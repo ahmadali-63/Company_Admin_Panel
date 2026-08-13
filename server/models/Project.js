@@ -10,13 +10,6 @@
         maxlength: [150, "Project name cannot exceed 150 characters"],
         },
 
-        description: {
-        type: String,
-        trim: true,
-        maxlength: [1000, "Description cannot exceed 1000 characters"],
-        default: "",
-        },
-
         code: {
         type: String,
         required: [true, "Project code is required"],
@@ -25,6 +18,13 @@
         trim: true,
         minlength: [2, "Project code must be at least 2 characters"],
         maxlength: [30, "Project code cannot exceed 30 characters"],
+        },
+
+        description: {
+        type: String,
+        trim: true,
+        maxlength: [1000, "Description cannot exceed 1000 characters"],
+        default: "",
         },
 
         status: {

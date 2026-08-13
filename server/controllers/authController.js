@@ -2,7 +2,7 @@
     const jwt = require("jsonwebtoken");
     const User = require("../models/User");
     // import { SUCCESS_MESSAGES } from "../utils/constants/messages.js";
-    const { SUCCESS_MESSAGES } = require("../utils/constants/messages");
+    const  SUCCESS_MESSAGES  = require("../utils/constants/messages.js");
 
     const generateToken = (userId) => {
     return jwt.sign(
@@ -19,14 +19,18 @@
     const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
+        console.log("🚀 ~ login ~ email:", email)
 
+    
         // Validate required fields
         if (!email || !password) {
         return res.status(400).json({
             success: false,
             message: "Email and password are required",
+            email: email,
         });
         }
+
 
         // Find user and explicitly include password
         const user = await User.findOne({
@@ -92,6 +96,55 @@
     }
     };
 
+    const signup = async (req, res, next) => {
+        try {
+            const { name, email, password, role } = req.body;
+
+            // Validate required fields
+            if (!name || !email || !password || !role) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Name, email, password, and role are required",
+                });
+            }
+
+            // Check if user already exists
+            const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+            if (existingUser) {
+                return res.status(409).json({
+                    success: false,
+                    message: "User with this email already exists",
+                });
+            }
+
+            // Hash the password
+            const hashedPassword = await bcrypt.hash(password, 12);
+
+            // Create new user
+            const newUser = await User.create({
+                name,
+                email: email.toLowerCase().trim(),
+                password: hashedPassword,
+                role,
+                isActive: true,
+            });
+
+            return res.status(201).json({
+                success: true,
+                message: SUCCESS_MESSAGES.USER_CREATED_SUCCESSFULLY,
+                user: {
+                    id: newUser._id,
+                    name: newUser.name,
+                    email: newUser.email,
+                    role: newUser.role,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     module.exports = {
     login,
+    signup
     };

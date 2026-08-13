@@ -5,6 +5,7 @@
     const userRoutes = require("./routes/userRoutes");
     const authRoutes = require("./routes/authRoutes");
     const errorMiddleware = require("./middleware/errorMiddleware");
+    const projectRoutes = require("./routes/projectRoutes");
 
     dotenv.config();
 
@@ -21,6 +22,7 @@
     // Routes
     app.use("/api/auth", authRoutes);
     app.use("/api/users", userRoutes);
+    app.use("/api/projects", projectRoutes);
 
     // Health check
     app.get("/", (req, res) => {

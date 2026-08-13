@@ -1,13 +1,13 @@
     const express = require("express");
 
     const {
-    createUser,
-    getUsers,
-    getUserById,
-    updateUser,
-    updateUserStatus,
-    deleteUser,
-    } = require("../controllers/userController");
+    createProject,
+    getProjects,
+    getProjectById,
+    updateProject,
+    assignHR,
+    removeHR,
+    } = require("../controllers/projectController");
 
     const {
     protect,
@@ -21,74 +21,70 @@
 
     /*
     |--------------------------------------------------------------------------
-    | USER MANAGEMENT
+    | PROJECT ROUTES
     |--------------------------------------------------------------------------
     */
 
     /*
-    * Create user
+    * Create project
     * Admin only
     */
     router.post(
     "/",
     protect,
     authorizeRoles("admin"),
-    createUser
+    createProject
     );
 
     /*
-    * Get all users
+    * Get projects
     * Admin only for now
     */
     router.get(
     "/",
     protect,
     authorizeRoles("admin"),
-    getUsers
+    getProjects
     );
 
     /*
-    * Get single user
-    * Admin only for now
+    * Get one project
     */
     router.get(
     "/:id",
     protect,
     authorizeRoles("admin"),
-    getUserById
+    getProjectById
     );
 
     /*
-    * Update user
-    * Admin only for now
+    * Update project
     */
     router.patch(
     "/:id",
     protect,
     authorizeRoles("admin"),
-    updateUser
+    updateProject
     );
 
     /*
-    * Activate / deactivate user
-    * Admin only
+    * Assign HR
     */
-    router.patch(
-    "/:id/status",
+    router.post(
+    "/:id/hr",
     protect,
     authorizeRoles("admin"),
-    updateUserStatus
+    assignHR
     );
 
     /*
-    * Delete user
-    * Admin only
+    * Remove HR
     */
     router.delete(
-    "/:id",
+    "/:id/hr",
     protect,
     authorizeRoles("admin"),
-    deleteUser
+    removeHR
     );
 
     module.exports = router;

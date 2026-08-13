@@ -1,6 +1,6 @@
     const express = require("express");
 
-    const { login } = require("../controllers/authController");
+    const { login ,signup} = require("../controllers/authController");
     const { protect } = require("../middleware/authMiddleware");
     const { authorizeRoles } = require("../middleware/roleMiddleware");
 
@@ -8,6 +8,7 @@
 
     // Public
     router.post("/login", login);
+    router.post("/signup", signup);
 
     // Any authenticated user
     router.get("/me", protect, (req, res) => {

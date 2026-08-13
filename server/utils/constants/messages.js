@@ -5,3 +5,5 @@ const SUCCESS_MESSAGES = {
     LOGIN_SUCCESSFUL: "Login successful",
     USER_CREATED_SUCCESSFULLY: "User created successfully",
 }
+
+module.exports = SUCCESS_MESSAGES;
