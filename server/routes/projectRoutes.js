@@ -25,7 +25,7 @@ router.get("/", protect, authorizeRoles("admin", "hr", "team_lead", "team_member
 
 router.get("/:id", protect, authorizeRoles("admin", "hr", "team_lead", "team_member"), getProjectById);
 
-router.put("/:id", protect, authorizeRoles("admin"), updateProject);
+router.put("/:id", protect, authorizeRoles("admin"), updateProject);S
 
 // HR assignments
 router.post("/:id/hr", protect, authorizeRoles("admin"), assignHR);
@@ -43,4 +43,6 @@ router.delete("/:id", protect, authorizeRoles("admin"), deleteProject);
 // this will export the modules now
 module.exports = router;
 
+// this is the ending point of the routing code for the project routes.
+module.exports = router
 // this is the ending point of the routing code for the project routes.
