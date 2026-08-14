@@ -42,3 +42,4 @@ router.delete("/:id/members", protect, authorizeRoles("admin", "hr", "team_lead"
 router.delete("/:id", protect, authorizeRoles("admin"), deleteProject);
 // this will export the modules now
 module.exports = router;
+// this is the ending point of the routing code for the project routes.
