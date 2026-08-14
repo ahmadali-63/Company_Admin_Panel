@@ -1,45 +1,49 @@
-    const express = require("express");
-    const dotenv = require("dotenv");
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
 
-    const connectDB = require("./config/db");
-    const userRoutes = require("./routes/userRoutes");
-    const authRoutes = require("./routes/authRoutes");
-    const errorMiddleware = require("./middleware/errorMiddleware");
+const connectDB = require("./config/db");
 
-    dotenv.config();
+const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("./routes/authRoutes");
+const projectRoutes = require("./routes/projectRoutes");
+const taskRoutes = require("./routes/taskroutes");
+const statsRoutes = require("./routes/statsRoutes");
 
-    const app = express();
+const errorMiddleware = require("./middleware/errorMiddleware");
 
-    const PORT = process.env.PORT || 5000;
+dotenv.config();
 
-    // Database
-    connectDB();
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-    // Body parser
-    app.use(express.json());
+connectDB();
 
-    // Routes
-    app.use("/api/auth", authRoutes);
-    app.use("/api/users", userRoutes);
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
 
-    // Health check
-    app.get("/", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Company Admin Panel API is running",
-    });
-    });
-    app.get("/abc", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "abc",
-    });
-    });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-    // Error handler — must be after routes
-    app.use(errorMiddleware);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/stats", statsRoutes);
 
-    // Start server
-    app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    });
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Company Admin Panel API is running",
+  });
+});
+
+app.use(errorMiddleware);
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

@@ -2,13 +2,25 @@
 
     const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI);
+        const mongoURI = process.env.MONGODB_URI;
 
-        console.log(`MongoDB connected: ${conn.connection.host}`);
-        console.log(`Database: ${conn.connection.name}`);
+        if (!mongoURI) {
+        throw new Error(
+            "MONGODB_URI is missing from .env"
+        );
+        }
+
+        const connection =
+        await mongoose.connect(mongoURI);
+
+        console.log(
+        `MongoDB connected: ${connection.connection.host}`
+        );
     } catch (error) {
-        console.error("MongoDB connection failed:");
-        console.error(error.message);
+        console.error(
+        "MongoDB connection failed:",
+        error.message
+        );
 
         process.exit(1);
     }

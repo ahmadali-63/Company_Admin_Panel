@@ -4,43 +4,53 @@
     {
         name: {
         type: String,
-        required: [true, "Project name is required"],
+        required: true,
         trim: true,
-        minlength: [2, "Project name must be at least 2 characters"],
-        maxlength: [150, "Project name cannot exceed 150 characters"],
+        maxlength: 150,
+        },
+
+        code: {
+        type: String,
+        required: true,
+        unique: true,
+        uppercase: true,
+        trim: true,
+        maxlength: 50,
         },
 
         description: {
         type: String,
         trim: true,
-        maxlength: [1000, "Description cannot exceed 1000 characters"],
         default: "",
-        },
-
-        code: {
-        type: String,
-        required: [true, "Project code is required"],
-        unique: true,
-        uppercase: true,
-        trim: true,
-        minlength: [2, "Project code must be at least 2 characters"],
-        maxlength: [30, "Project code cannot exceed 30 characters"],
+        maxlength: 2000,
         },
 
         status: {
         type: String,
-        enum: ["active", "completed", "on_hold", "cancelled"],
-        default: "active",
+        enum: [
+            "planning",
+            "active",
+            "on_hold",
+            "completed",
+            "cancelled",
+        ],
+        default: "planning",
         },
 
         startDate: {
         type: Date,
-        required: [true, "Project start date is required"],
+        default: null,
         },
 
         endDate: {
         type: Date,
         default: null,
+        },
+
+        createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
         },
 
         hrIds: [
@@ -50,11 +60,19 @@
         },
         ],
 
-        createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: [true, "Project creator is required"],
+        teamLeadIds: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
         },
+        ],
+
+        memberIds: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
+        ],
 
         isActive: {
         type: Boolean,
@@ -66,6 +84,23 @@
     }
     );
 
-    const Project = mongoose.model("Project", projectSchema);
+    projectSchema.index({
+    status: 1,
+    });
 
-    module.exports = Project;
+    projectSchema.index({
+    hrIds: 1,
+    });
+
+    projectSchema.index({
+    teamLeadIds: 1,
+    });
+
+    projectSchema.index({
+    memberIds: 1,
+    });
+
+    module.exports = mongoose.model(
+    "Project",
+    projectSchema
+    );
