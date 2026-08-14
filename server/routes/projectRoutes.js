@@ -45,8 +45,5 @@ module.exports = router;
 
 // this is the ending point of the routing code for the project routes.
 module.exports = router
-// this is the ending point of the routing code for the project routes.
-<<<<<<< HEAD
-=======
-main
->>>>>>> b931b366b94a3c7d3aa649fb2ef9c2edebbe9140
+// this is the ending point of the routing code for the project routes. 
+//end of the files code 
