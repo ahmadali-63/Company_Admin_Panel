@@ -40,5 +40,5 @@ router.post("/:id/members", protect, authorizeRoles("admin", "hr", "team_lead"),
 router.delete("/:id/members", protect, authorizeRoles("admin", "hr", "team_lead"), removeMember);
 
 router.delete("/:id", protect, authorizeRoles("admin"), deleteProject);
-
+// this will export the modules now
 module.exports = router;
