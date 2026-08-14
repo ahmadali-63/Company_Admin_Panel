@@ -1,14 +1,42 @@
-    const errorMiddleware = (err, req, res, next) => {
-    console.error("Error:", err);
+    const errorMiddleware = (
+    error,
+    req,
+    res,
+    next
+    ) => {
+    console.error("ERROR:", error);
 
-    const statusCode = err.statusCode || 500;
+    if (error.name === "ValidationError") {
+        return res.status(400).json({
+        success: false,
+        message: "Validation error.",
+        errors: Object.values(
+            error.errors
+        ).map((err) => err.message),
+        });
+    }
 
-    res.status(statusCode).json({
+    if (error.name === "CastError") {
+        return res.status(400).json({
+        success: false,
+        message: "Invalid ID.",
+        });
+    }
+
+    if (error.code === 11000) {
+        return res.status(409).json({
+        success: false,
+        message:
+            "A record with this value already exists.",
+        });
+    }
+
+    return res.status(500).json({
         success: false,
         message:
         process.env.NODE_ENV === "development"
-            ? err.message
-            : "Internal server error",
+            ? error.message
+            : "Internal server error.",
     });
     };
 

@@ -1,4 +1,5 @@
     const dotenv = require("dotenv");
+    const mongoose = require("mongoose");
     const bcrypt = require("bcryptjs");
 
     const connectDB = require("../config/db");
@@ -6,49 +7,55 @@
 
     dotenv.config();
 
+    const ADMIN = {
+    name: "System Administrator",
+    email: "admin@example.com",
+    password: "Admin@12345",
+    role: "admin",
+    phone: "1234567890",
+    department: "Administration",
+    designation: "System Admin",
+    };
+
     const seedAdmin = async () => {
     try {
         await connectDB();
 
-        const existingAdmin = await User.findOne({
-        role: "admin",
-        });
+        const existingAdmin = await User.findOne({ email: ADMIN.email });
 
         if (existingAdmin) {
         console.log("Admin account already exists.");
+        await mongoose.connection.close();
         process.exit(0);
         }
 
-        const password = process.env.ADMIN_PASSWORD;
+        const hashedPassword = await bcrypt.hash(ADMIN.password, 12);
 
-        if (!password) {
-        console.error(
-            "ADMIN_PASSWORD is missing from the .env file."
-        );
-        process.exit(1);
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 12);
-
-        const admin = await User.create({
-        name: "System Administrator",
-        email: process.env.ADMIN_EMAIL || "admin@company.com",
+        await User.create({
+        name: ADMIN.name,
+        email: ADMIN.email,
         password: hashedPassword,
-        role: "admin",
-        projectIds: [],
+        role: ADMIN.role,
+        phone: ADMIN.phone,
+        department: ADMIN.department,
+        designation: ADMIN.designation,
         hrId: null,
         teamLeadId: null,
+        projectIds: [],
         isActive: true,
         });
 
-        console.log("Admin account created successfully.");
-        console.log(`Email: ${admin.email}`);
+        console.log("Admin created successfully.");
+        console.log(`Email: ${ADMIN.email}`);
+        console.log(`Password: ${ADMIN.password}`);
 
+        await mongoose.connection.close();
         process.exit(0);
     } catch (error) {
-        console.error("Failed to create Admin:");
-        console.error(error.message);
-
+        console.error("Admin seed failed:", error);
+        if (mongoose.connection.readyState !== 0) {
+        await mongoose.connection.close();
+        }
         process.exit(1);
     }
     };

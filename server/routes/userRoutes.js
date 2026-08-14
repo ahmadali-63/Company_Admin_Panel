@@ -19,16 +19,6 @@
 
     const router = express.Router();
 
-    /*
-    |--------------------------------------------------------------------------
-    | USER MANAGEMENT
-    |--------------------------------------------------------------------------
-    */
-
-    /*
-    * Create user
-    * Admin only
-    */
     router.post(
     "/",
     protect,
@@ -36,43 +26,35 @@
     createUser
     );
 
-    /*
-    * Get all users
-    * Admin only for now
-    */
     router.get(
     "/",
     protect,
-    authorizeRoles("admin"),
+    authorizeRoles(
+        "admin",
+        "hr",
+        "team_lead"
+    ),
     getUsers
     );
 
-    /*
-    * Get single user
-    * Admin only for now
-    */
     router.get(
     "/:id",
     protect,
-    authorizeRoles("admin"),
+    authorizeRoles(
+        "admin",
+        "hr",
+        "team_lead"
+    ),
     getUserById
     );
 
-    /*
-    * Update user
-    * Admin only for now
-    */
-    router.patch(
+    router.put(
     "/:id",
     protect,
     authorizeRoles("admin"),
     updateUser
     );
 
-    /*
-    * Activate / deactivate user
-    * Admin only
-    */
     router.patch(
     "/:id/status",
     protect,
@@ -80,10 +62,6 @@
     updateUserStatus
     );
 
-    /*
-    * Delete user
-    * Admin only
-    */
     router.delete(
     "/:id",
     protect,

@@ -1,74 +1,94 @@
-    const mongoose = require("mongoose");
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-    const userSchema = new mongoose.Schema(
-    {
-        name: {
-        type: String,
-        required: [true, "Name is required"],
-        trim: true,
-        minlength: [2, "Name must be at least 2 characters"],
-        maxlength: [100, "Name cannot exceed 100 characters"],
-        },
-
-        email: {
-        type: String,
-        required: [true, "Email is required"],
-        unique: true,
-        lowercase: true,
-        trim: true,
-        match: [
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            "Please provide a valid email address",
-        ],
-        },
-
-        password: {
-        type: String,
-        required: [true, "Password is required"],
-        minlength: [6, "Password must be at least 6 characters"],
-        select: false,
-        },
-
-        role: {
-        type: String,
-        enum: ["admin", "hr", "team_lead", "team_member"],
-        required: [true, "Role is required"],
-        },
-
-        projectIds: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Project",
-        },
-        ],
-
-        hrId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        default: null,
-        },
-
-        teamLeadId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        default: null,
-        },
-
-        isActive: {
-        type: Boolean,
-        default: true,
-        },
-
-        lastLogin: {
-        type: Date,
-        default: null,
-        },
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 100,
     },
-    {
-        timestamps: true,
-    }
-    );
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        "Please enter a valid email address",
+      ],
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false,
+    },
+    role: {
+      type: String,
+      enum: ["admin", "hr", "team_lead", "team_member"],
+      required: true,
+    },
+    phone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    department: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    designation: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    hrId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    teamLeadId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    projectIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Project",
+      },
+    ],
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-    const User = mongoose.model("User", userSchema);
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) {
+    return;
+  }
+  if (this.password.startsWith("$2a$") || this.password.startsWith("$2b$")) {
+    return;
+  }
+  const salt = await bcrypt.genSalt(12);
+  this.password = await bcrypt.hash(this.password, salt);
+});
 
-    module.exports = User;
+userSchema.index({ role: 1 });
+userSchema.index({ hrId: 1 });
+userSchema.index({ teamLeadId: 1 });
+
+module.exports = mongoose.model("User", userSchema);

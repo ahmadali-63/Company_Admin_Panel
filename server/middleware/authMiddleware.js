@@ -5,10 +5,13 @@
     try {
         const authHeader = req.headers.authorization;
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        if (
+        !authHeader ||
+        !authHeader.startsWith("Bearer ")
+        ) {
         return res.status(401).json({
             success: false,
-            message: "Authentication required. Please provide a valid token.",
+            message: "Authentication required.",
         });
         }
 
@@ -21,28 +24,29 @@
         });
         }
 
-        // Verify JWT
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET
+        );
 
-        // Find current user
-        const user = await User.findById(decoded.userId).select("-password");
+        const user = await User.findById(
+        decoded.userId
+        ).select("-password");
 
         if (!user) {
         return res.status(401).json({
             success: false,
-            message: "User associated with this token no longer exists.",
+            message: "User account not found.",
         });
         }
 
-        // Prevent inactive users from accessing protected APIs
-        if (!user.isActive) {
+        if (user.isActive === false) {
         return res.status(403).json({
             success: false,
             message: "Your account is inactive.",
         });
         }
 
-        // Attach authenticated user to request
         req.user = user;
 
         next();
@@ -50,7 +54,7 @@
         if (error.name === "TokenExpiredError") {
         return res.status(401).json({
             success: false,
-            message: "Your session has expired. Please log in again.",
+            message: "Token has expired.",
         });
         }
 

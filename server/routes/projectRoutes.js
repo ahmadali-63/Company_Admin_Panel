@@ -1,90 +1,44 @@
-    const express = require("express");
+const express = require("express");
 
-    const {
-    createProject,
-    getProjects,
-    getProjectById,
-    updateProject,
-    assignHR,
-    removeHR,
-    } = require("../controllers/projectController");
+const {
+  createProject,
+  getProjects,
+  getProjectById,
+  updateProject,
+  assignHR,
+  removeHR,
+  assignTeamLead,
+  removeTeamLead,
+  assignMember,
+  removeMember,
+  deleteProject,
+} = require("../controllers/projectController");
 
-    const {
-    protect,
-    } = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/roleMiddleware");
 
-    const {
-    authorizeRoles,
-    } = require("../middleware/roleMiddleware");
+const router = express.Router();
 
-    const router = express.Router();
+router.post("/", protect, authorizeRoles("admin"), createProject);
 
-    /*
-    |--------------------------------------------------------------------------
-    | PROJECT ROUTES
-    |--------------------------------------------------------------------------
-    */
+router.get("/", protect, authorizeRoles("admin", "hr", "team_lead", "team_member"), getProjects);
 
-    /*
-    * Create project
-    * Admin only
-    */
-    router.post(
-    "/",
-    protect,
-    authorizeRoles("admin"),
-    createProject
-    );
+router.get("/:id", protect, authorizeRoles("admin", "hr", "team_lead", "team_member"), getProjectById);
 
-    /*
-    * Get projects
-    * Admin only for now
-    */
-    router.get(
-    "/",
-    protect,
-    authorizeRoles("admin"),
-    getProjects
-    );
+router.put("/:id", protect, authorizeRoles("admin"), updateProject);
 
-    /*
-    * Get one project
-    */
-    router.get(
-    "/:id",
-    protect,
-    authorizeRoles("admin"),
-    getProjectById
-    );
+// HR assignments
+router.post("/:id/hr", protect, authorizeRoles("admin"), assignHR);
+router.delete("/:id/hr", protect, authorizeRoles("admin"), removeHR);
 
-    /*
-    * Update project
-    */
-    router.patch(
-    "/:id",
-    protect,
-    authorizeRoles("admin"),
-    updateProject
-    );
+// Team Lead assignments
+router.post("/:id/team-leads", protect, authorizeRoles("admin", "hr"), assignTeamLead);
+router.delete("/:id/team-leads", protect, authorizeRoles("admin", "hr"), removeTeamLead);
 
-    /*
-    * Assign HR
-    */
-    router.post(
-    "/:id/hr",
-    protect,
-    authorizeRoles("admin"),
-    assignHR
-    );
+// Team Member assignments
+router.post("/:id/members", protect, authorizeRoles("admin", "hr", "team_lead"), assignMember);
+router.delete("/:id/members", protect, authorizeRoles("admin", "hr", "team_lead"), removeMember);
 
-    /*
-    * Remove HR
-    */
-    router.delete(
-    "/:id/hr",
-    protect,
-    authorizeRoles("admin"),
-    removeHR
-    );
+router.delete("/:id", protect, authorizeRoles("admin"), deleteProject);
 
-    module.exports = router;
+module.exports = router;
