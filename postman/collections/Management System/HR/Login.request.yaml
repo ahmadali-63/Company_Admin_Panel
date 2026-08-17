@@ -1,0 +1,14 @@
+$kind: http-request
+name: Login
+url: "{{BASE_URL}}auth/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"ali@gmail.com\",\r
+
+    \    \"password\": \"ali12345\"\r
+
+    }"
+order: 1786960264855

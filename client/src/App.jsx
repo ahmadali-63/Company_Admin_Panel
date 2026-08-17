@@ -20,6 +20,8 @@ import TeamMemberDetail from "./pages/teamMembers/TeamMemberDetail";
 import ProjectList from "./pages/projects/ProjectList";
 import ProjectDetail from "./pages/projects/ProjectDetail";
 import TaskList from "./pages/tasks/TaskList";
+import Attendance from "./pages/Attendance";
+import Leaves from "./pages/Leaves";
 import Settings from "./pages/Settings";
 
 function App() {
@@ -61,6 +63,8 @@ function App() {
               <Route path="/projects" element={<ProjectList />} />
               <Route path="/projects/:id" element={<ProjectDetail />} />
               <Route path="/tasks" element={<TaskList />} />
+              <Route path="/attendance" element={<Attendance />} />
+              <Route path="/leaves" element={<Leaves />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
           </Route>

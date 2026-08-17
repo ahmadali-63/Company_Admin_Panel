@@ -1,2 +1,9 @@
 $kind: collection
 name: Management System
+variables:
+  - key: supabase_service_role_api_key_0ksu
+    secret: true
+    disabled: false
+  - key: bearer_token_1c9o
+    secret: true
+    disabled: false

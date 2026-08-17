@@ -17,6 +17,8 @@ import {
   ChevronDown,
   Building2,
   Bell,
+  Clock,
+  FileText,
 } from "lucide-react";
 
 const DashboardLayout = () => {
@@ -72,6 +74,18 @@ const DashboardLayout = () => {
       label: "Tasks",
       path: "/tasks",
       icon: CheckSquare,
+      roles: ["admin", "hr", "team_lead", "team_member"],
+    },
+    {
+      label: "Attendance",
+      path: "/attendance",
+      icon: Clock,
+      roles: ["admin", "hr", "team_lead", "team_member"],
+    },
+    {
+      label: "Leaves",
+      path: "/leaves",
+      icon: FileText,
       roles: ["admin", "hr", "team_lead", "team_member"],
     },
     {

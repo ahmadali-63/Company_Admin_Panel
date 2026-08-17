@@ -1,0 +1,14 @@
+$kind: http-request
+name: login
+url: "{{BASE_URL}}auth/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"admin@company.com\",\r
+
+    \    \"password\": \"Admin@12345\"\r
+
+    }"
+order: 1786958245433

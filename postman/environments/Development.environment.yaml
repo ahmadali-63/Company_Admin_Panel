@@ -1,0 +1,6 @@
+name: Development
+values:
+  - key: BASE_URL
+    value: ''
+  - key: HR_BEARER_TOKEN
+    secret: true

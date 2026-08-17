@@ -1,0 +1,12 @@
+$kind: http-request
+name: GetAllUsers
+url: "{{BASE_URL}}users"
+method: GET
+body:
+  type: json
+  content: ""
+auth:
+  type: bearer
+  credentials:
+    token: Bearer {{supabase_service_role_api_key_0ksu}}
+order: 432739571862400
