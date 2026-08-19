@@ -1,3 +1,5 @@
+import { ERROR_MESSAGES } from "../constants/messages.js";
+
 /**
  * Operational error: a failure we anticipated and can safely describe to the
  * client. Anything that is NOT an AppError is treated as a bug and reported
@@ -31,7 +33,7 @@ export class UnauthorizedError extends AppError {
 
 export class ForbiddenError extends AppError {
   constructor(
-    message = "You do not have permission to perform this action.",
+    message = ERROR_MESSAGES.FORBIDDEN,
     details?: unknown,
   ) {
     super(403, message, details);

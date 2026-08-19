@@ -10,7 +10,6 @@ const extractBearerToken = (header: string | undefined): string | null | undefin
   if (!header?.startsWith("Bearer ")) return null;
   const token = header.slice("Bearer ".length).trim() || "";
 
-  console.log("🚀 ~ extractBearerToken ~ token:", token)
   return token.length > 0 ? token?.split(" ")[1] : null;
 };
 
@@ -27,14 +26,12 @@ export const authenticate = async (
     }
 
     const token = extractBearerToken(header);
-    console.log("🚀 ~ authenticate ~ token:", token)
 
     if (!token) {
       throw new UnauthorizedError(ERROR_MESSAGES.TOKEN_MISSING);
     }
 
     const payload = verifyAccessToken(token);
-    console.log("🚀 ~ authenticate ~ payload:", payload)
 
     const user = await UserModel.findById(payload.userId)
       .select("name email role isActive hrId teamLeadId projectIds")
@@ -46,7 +43,7 @@ export const authenticate = async (
     }
 
     if (user.isActive === false) {
-      throw new ForbiddenError("Your account is inactive.");
+      throw new ForbiddenError("You do not have permission to perform this action.");
     }
 
     req.user = user;

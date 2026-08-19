@@ -6,6 +6,7 @@ import { validate } from "../../common/middleware/validate.js";
 import { asyncHandler } from "../../common/utils/asyncHandler.js";
 import { attendanceController } from "./attendance.controller.js";
 import { createAttendanceSchema, listAttendanceQuerySchema } from "./attendance.schema.js";
+import { ROUTES } from "../../common/constants/routes.js";
 
 const router = Router();
 
@@ -18,25 +19,26 @@ router.post(
 );
 
 router.post(
-  "/check-out",
+  ROUTES.ATTENDANCE.CHECK_OUT,
   asyncHandler(attendanceController.checkOut),
 );
 
 router.get(
-  "/today",
+  ROUTES.ATTENDANCE.TODAY_STATUS,
   asyncHandler(attendanceController.getTodayStatus),
 );
 
 router.get(
-  "/my-attendance",
+  ROUTES.ATTENDANCE.MY_ATTENDANCE,
   asyncHandler(attendanceController.getMyAttendance),
 );
 
 router.get(
-  "/all",
+  ROUTES.ATTENDANCE.ALL,
   authorize(ROLE.ADMIN, ROLE.HR, ROLE.TEAM_LEAD),
   validate({ query: listAttendanceQuerySchema }),
   asyncHandler(attendanceController.getAllAttendance),
 );
+//TODO: Add pagination in upcoming days.
 
 export const attendanceRoutes = router;

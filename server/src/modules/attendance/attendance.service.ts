@@ -1,4 +1,4 @@
-import { AttendanceModel, type AttendanceAttrs } from "./attendance.model.js";
+import { AttendanceModel } from "./attendance.model.js";
 import { BadRequestError, NotFoundError } from "../../common/errors/AppError.js";
 import type { Types } from "mongoose";
 
@@ -8,7 +8,8 @@ const getTodayString = (): string => {
 };
 
 export class AttendanceService {
-  async checkIn(userId: string | Types.ObjectId, notes: string = "") {
+ 
+  async checkIn(userId: string) {
     const dateStr = getTodayString();
     const existing = await AttendanceModel.findOne({ userId, date: dateStr });
 
@@ -23,9 +24,7 @@ export class AttendanceService {
       date: dateStr,
       checkIn: now,
       checkOut: null,
-      status: "present",
-      notes,
-    });
+      status: "present"    });
 
     return attendance;
   }

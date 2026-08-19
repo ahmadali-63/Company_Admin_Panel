@@ -3,9 +3,9 @@ import { attendanceService } from "./attendance.service.js";
 
 export class AttendanceController {
   async checkIn(req: Request, res: Response) {
-    const userId = req.user!._id;
+    const userId = req.user!._id.toString();
     const { notes } = req.body;
-    const attendance = await attendanceService.checkIn(userId, notes);
+    const attendance = await attendanceService.checkIn(userId);
     res.status(201).json({
       success: true,
       message: "Successfully checked in automatically at current office arrival time",
@@ -14,7 +14,7 @@ export class AttendanceController {
   }
 
   async checkOut(req: Request, res: Response) {
-    const userId = req.user!._id;
+    const userId = req.user!._id.toString();
     const attendance = await attendanceService.checkOut(userId);
     res.status(200).json({
       success: true,
@@ -24,7 +24,7 @@ export class AttendanceController {
   }
 
   async getTodayStatus(req: Request, res: Response) {
-    const userId = req.user!._id;
+    const userId = req.user!._id.toString();
     const attendance = await attendanceService.getTodayStatus(userId);
     res.status(200).json({
       success: true,
@@ -33,7 +33,7 @@ export class AttendanceController {
   }
 
   async getMyAttendance(req: Request, res: Response) {
-    const userId = req.user!._id;
+    const userId = req.user!._id.toString();
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 20;
     const result = await attendanceService.getUserAttendance(userId, page, limit);

@@ -1,4 +1,5 @@
 
+import { ObjectId } from "mongodb";
 import { ROLE } from "../../common/constants/roles.js";
 import {
   BadRequestError,
@@ -22,6 +23,7 @@ import type {
   ListTasksQuery,
   UpdateTaskInput,
 } from "./task.schema.js";
+import { toObjectId } from "../../common/utils/objectId.js";
 
 /**
  * A task is visible when it belongs to a project the actor can see, or when
@@ -51,7 +53,9 @@ const buildTaskScopeFilter = async (
 
 export const taskService = {
   async create(actor: AuthenticatedUser, input: CreateTaskInput) {
+    console.log("🚀 ~ actor:", actor)
     const project = await projectRepository.findById(input.projectId);
+    console.log("🚀 ~ project:", project)
 
     if (!project) {
       throw new NotFoundError("Project not found.");
@@ -60,10 +64,10 @@ export const taskService = {
     // A non-admin may only create tasks inside a project they belong to.
     if (
       actor.role !== ROLE.ADMIN &&
-      !containsId(project.hrIds, actor._id) &&
+      !containsId(project.memberIds, actor._id) &&
       !containsId(project.teamLeadIds, actor._id)
     ) {
-      throw new ForbiddenError("You do not have access to this project.");
+      throw new ForbiddenError("You do not have permission to perform this action.");
     }
 
     const assignedUser = await userRepository.findById(input.assignedTo);
@@ -147,7 +151,7 @@ export const taskService = {
     }
 
     if (actor.role === ROLE.TEAM_MEMBER) {
-      throw new ForbiddenError("You do not have access to this task.");
+      throw new ForbiddenError("You do not have permission to perform this action.");
     }
 
     const project = await projectRepository.findById(task.projectId);
@@ -158,11 +162,12 @@ export const taskService = {
         containsId(project.teamLeadIds, actor._id));
 
     if (!onProject) {
-      throw new ForbiddenError("You do not have access to this task.");
+      throw new ForbiddenError("You do not have permission to perform this action.");
     }
   },
 
   async update(actor: AuthenticatedUser, id: string, input: UpdateTaskInput) {
+
     const task = await taskRepository.findById(id);
 
     if (!task) {

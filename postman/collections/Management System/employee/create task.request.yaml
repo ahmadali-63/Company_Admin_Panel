@@ -1,0 +1,20 @@
+$kind: http-request
+name: create task
+url: "{{BASE_URL}}tasks/createTask"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"title\": \"my first task\",\r
+
+    \    \"projectId\": \"6a7f6f06c11ea487149f8de9\",\r
+
+    \    \"assignedTo\": \"6a82f190b29593e2e0d681f6\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{EMPLOYEE_BEARER_TOKEN}}"
+order: 4308827444292042

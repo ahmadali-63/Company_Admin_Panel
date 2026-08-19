@@ -5,7 +5,6 @@ export const createAttendanceSchema = z.object({
 });
 
 export const listAttendanceQuerySchema = z.object({
-  userId: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   page: z.coerce.number().int().positive().optional().default(1),

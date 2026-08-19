@@ -1,0 +1,12 @@
+$kind: http-request
+name: checkin
+url: "{{BASE_URL}}attendance/check-in"
+method: POST
+body:
+  type: json
+  content: ""
+auth:
+  type: bearer
+  credentials:
+    token: "{{EMPLOYEE_BEARER_TOKEN}}"
+order: 2000

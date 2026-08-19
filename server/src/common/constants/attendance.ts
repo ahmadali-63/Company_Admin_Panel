@@ -1,0 +1,1 @@
+export const ATTENDANCE_STATUSES = ["present", "half_day", "absent", "on_leave"] as const;

@@ -47,6 +47,7 @@ export const taskController = {
     req: AuthedRequest<IdParam, unknown, UpdateTaskInput>,
     res: Response,
   ) {
+    console.log("🚀 ~ req.params.id:", req.params.id)
     const task = await taskService.update(req.user, req.params.id, req.body);
 
     res.status(200).json({

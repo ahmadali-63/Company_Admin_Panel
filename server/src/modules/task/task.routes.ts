@@ -18,14 +18,21 @@ const router = Router();
 router.use(authenticate);
 
 router.post(
-  "/",
-  authorize(ROLE.ADMIN, ROLE.HR, ROLE.TEAM_LEAD),
+  "/createTask",
+  authorize(ROLE.ADMIN, ROLE.TEAM_MEMBER, ROLE.TEAM_LEAD),
   validate({ body: createTaskSchema }),
   asyncHandler(taskController.create),
 );
 
+router.post(
+  "/updateTask/:id",
+  authorize(ROLE.ADMIN, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
+  validate({ params: idParamSchema, body: updateTaskSchema }),
+  asyncHandler(taskController.update),
+);
+
 router.get(
-  "/",
+  "/listTasks",
   authorize(ROLE.ADMIN, ROLE.HR, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
   validate({ query: listTasksQuerySchema }),
   asyncHandler(taskController.list),

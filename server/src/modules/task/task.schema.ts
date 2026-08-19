@@ -10,7 +10,7 @@ import {
   paginationQuerySchema,
 } from "../../common/schemas/common.schema.js";
 
-export const createTaskSchema = z.object({
+export const  createTaskSchema = z.object({
   title: z.string().trim().min(1, "is required").max(200),
   description: z.string().trim().max(2000).default(""),
   projectId: objectIdSchema,
