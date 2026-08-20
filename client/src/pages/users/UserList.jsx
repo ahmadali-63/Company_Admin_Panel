@@ -185,7 +185,7 @@ const UserList = () => {
       {/* Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-white tracking-tight">User Directory</h1>
+          <h1 className="text-xl font-extrabold text-slate-100 tracking-tight">User Directory</h1>
           <p className="text-xs text-slate-400">Manage all employee accounts, hierarchy, and permissions</p>
         </div>
         <button

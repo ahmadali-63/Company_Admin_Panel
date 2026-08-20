@@ -51,7 +51,7 @@ const StatCard = ({ title, value, icon: Icon, color = "indigo", subtitle, trend 
       </div>
 
       <div className="mt-4 flex items-baseline justify-between">
-        <span className="text-3xl font-extrabold text-white tracking-tight">
+        <span className="text-3xl font-extrabold text-blue-500 tracking-tight">
           {value !== undefined ? value : 0}
         </span>
         {subtitle ? (

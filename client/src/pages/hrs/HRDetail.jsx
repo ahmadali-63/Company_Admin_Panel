@@ -59,7 +59,7 @@ const HRDetail = () => {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-xl font-extrabold text-white">{hr.name}</h1>
+          <h1 className="text-xl font-extrabold text-slate-100">{hr.name}</h1>
           <p className="text-xs text-slate-400">HR Manager Profile & Assigned Teams</p>
         </div>
       </div>

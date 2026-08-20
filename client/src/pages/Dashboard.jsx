@@ -75,8 +75,8 @@ const Dashboard = () => {
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="space-y-1 z-10">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">
-              Welcome back, {user?.name}! 👋
+            <h1 className="text-2xl font-extrabold text-slate-400 tracking-tight">
+              Welcome back, {user?.name}!
             </h1>
             <RoleBadge role={user?.role} />
           </div>
@@ -184,13 +184,15 @@ const Dashboard = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip
+                  <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderColor: "#334155",
+                    backgroundColor: "#ffffff",
+                    borderColor: "#bfdbfe",
                     borderRadius: "12px",
-                    color: "#fff",
+                    color: "#1d4ed8",
                   }}
+                  itemStyle={{ color: "#1d4ed8", fontWeight: 700 }}
+                  labelStyle={{ color: "#1d4ed8", fontWeight: 700 }}
                 />
                 <Legend formatter={(value) => <span className="text-xs text-slate-300 font-medium">{value}</span>} />
               </PieChart>
@@ -210,11 +212,13 @@ const Dashboard = () => {
                 <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} allowDecimals={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderColor: "#334155",
+                    backgroundColor: "#ffffff",
+                    borderColor: "#bfdbfe",
                     borderRadius: "12px",
-                    color: "#fff",
+                    color: "#1d4ed8",
                   }}
+                  itemStyle={{ color: "#1d4ed8", fontWeight: 700 }}
+                  labelStyle={{ color: "#1d4ed8", fontWeight: 700 }}
                 />
                 <Bar dataKey="value" fill="#6366f1" radius={[6, 6, 0, 0]} />
               </BarChart>
