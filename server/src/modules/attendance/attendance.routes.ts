@@ -27,6 +27,10 @@ router.get(
   ROUTES.ATTENDANCE.TODAY_STATUS,
   asyncHandler(attendanceController.getTodayStatus),
 );
+router.get(
+  "/today",
+  asyncHandler(attendanceController.getTodayStatus),
+);
 
 router.get(
   ROUTES.ATTENDANCE.MY_ATTENDANCE,

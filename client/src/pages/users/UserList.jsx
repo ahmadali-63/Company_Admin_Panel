@@ -137,9 +137,14 @@ const UserList = () => {
       if (editingUser) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
+        if (payload.hrId === "") payload.hrId = null;
+        if (payload.teamLeadId === "") payload.teamLeadId = null;
         await API.put(`/users/${editingUser._id}`, payload);
       } else {
-        await API.post("/users", formData);
+        const payload = { ...formData };
+        if (payload.hrId === "") payload.hrId = null;
+        if (payload.teamLeadId === "") payload.teamLeadId = null;
+        await API.post("/users", payload);
       }
       setModalOpen(false);
       fetchUsers();

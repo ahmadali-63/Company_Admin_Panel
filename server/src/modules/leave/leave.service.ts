@@ -1,5 +1,5 @@
 import { LeaveModel, type LeaveType, type LeaveStatus } from "./leave.model.js";
-import { AppError } from "../../common/errors/AppError.js";
+import { NotFoundError } from "../../common/errors/AppError.js";
 import type { Types } from "mongoose";
 
 export class LeaveService {
@@ -66,7 +66,7 @@ export class LeaveService {
   ) {
     const leave = await LeaveModel.findById(leaveId);
     if (!leave) {
-      throw AppError.notFound("Leave request not found");
+      throw new NotFoundError("Leave request not found");
     }
 
     leave.status = status;

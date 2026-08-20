@@ -6,11 +6,10 @@ import { verifyAccessToken } from "../../modules/auth/token.service.js";
 import { UserModel } from "../../modules/user/user.model.js";
 import type { AuthenticatedUser } from "../types/auth.js";
 
-const extractBearerToken = (header: string | undefined): string | null | undefined => {
+const extractBearerToken = (header: string | undefined): string | null => {
   if (!header?.startsWith("Bearer ")) return null;
-  const token = header.slice("Bearer ".length).trim() || "";
-
-  return token.length > 0 ? token?.split(" ")[1] : null;
+  const token = header.slice("Bearer ".length).trim();
+  return token.length > 0 ? token : null;
 };
 
 export const authenticate = async (

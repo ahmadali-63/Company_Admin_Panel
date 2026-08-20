@@ -32,7 +32,7 @@ export class LeaveController {
   }
 
   async updateLeaveStatus(req: Request, res: Response) {
-    const leaveId = req.params.id;
+    const leaveId = String(req.params.id);
     const reviewerId = req.user!._id;
     const { status, reviewComment } = req.body;
     const leave = await leaveService.updateLeaveStatus(leaveId, reviewerId, status, reviewComment);

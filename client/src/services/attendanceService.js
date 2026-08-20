@@ -10,7 +10,7 @@ export const attendanceService = {
     return res.data;
   },
   getTodayStatus: async () => {
-    const res = await API.get("/attendance/today");
+    const res = await API.get("/attendance/today-status");
     return res.data;
   },
   getMyAttendance: async (page = 1, limit = 20) => {

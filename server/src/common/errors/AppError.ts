@@ -33,7 +33,7 @@ export class UnauthorizedError extends AppError {
 
 export class ForbiddenError extends AppError {
   constructor(
-    message = ERROR_MESSAGES.FORBIDDEN,
+    message: string = ERROR_MESSAGES.FORBIDDEN,
     details?: unknown,
   ) {
     super(403, message, details);

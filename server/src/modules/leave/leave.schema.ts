@@ -2,9 +2,7 @@ import { z } from "zod";
 import { LEAVE_TYPES, LEAVE_STATUSES } from "./leave.model.js";
 
 export const applyLeaveSchema = z.object({
-  leaveType: z.enum(LEAVE_TYPES, {
-    errorMap: () => ({ message: "Leave type must be medical, emergency, or urgent_work" }),
-  }),
+  leaveType: z.enum(LEAVE_TYPES),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
   reason: z.string().min(5, "Reason must be at least 5 characters").max(500),

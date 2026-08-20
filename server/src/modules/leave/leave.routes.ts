@@ -6,11 +6,7 @@ import { validate } from "../../common/middleware/validate.js";
 import { idParamSchema } from "../../common/schemas/common.schema.js";
 import { asyncHandler } from "../../common/utils/asyncHandler.js";
 import { leaveController } from "./leave.controller.js";
-import {
-  applyLeaveSchema,
-  listLeavesQuerySchema,
-  updateLeaveStatusSchema,
-} from "./leave.schema.js";
+import {  applyLeaveSchema, listLeavesQuerySchema, updateLeaveStatusSchema } from "./leave.schema.js";
 
 const router = Router();
 
