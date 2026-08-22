@@ -4,11 +4,20 @@ import { createApp } from "./app.js";
 import { connectDB, disconnectDB } from "./config/db.js";
 import { env } from "./config/env.js";
 import { logger } from "./config/logger.js";
+import { UserModel } from "./modules/user/user.model.js";
+import { seedDatabase } from "./scripts/seedAll.js";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
 const start = async (): Promise<void> => {
   await connectDB();
+
+  // Auto-seed if database is empty
+  const userCount = await UserModel.countDocuments();
+  if (userCount === 0) {
+    logger.info("Empty database detected. Auto-seeding initial company data...");
+    await seedDatabase();
+  }
 
   const app = createApp();
   const server: Server = app.listen(env.PORT, () => {
@@ -26,7 +35,6 @@ const start = async (): Promise<void> => {
 
     logger.info({ signal }, "Shutting down");
 
-    // Hard stop if in-flight requests refuse to drain.
     const timer = setTimeout(() => {
       logger.error("Shutdown timed out, forcing exit");
       process.exit(1);

@@ -17,21 +17,21 @@ export const makeUser = async (
     email: string;
     password: string;
     name: string;
+    employeeId: string;
     isActive: boolean;
     hrId: Types.ObjectId | null;
-    teamLeadId: Types.ObjectId | null;
   }> = {},
 ): Promise<UserDocument> => {
   counter += 1;
 
   return UserModel.create({
+    employeeId: overrides.employeeId ?? `EMP-${counter}`,
     name: overrides.name ?? `User ${counter}`,
     email: overrides.email ?? `user${counter}@example.com`,
     password: overrides.password ?? "Password123!",
-    role: overrides.role ?? ROLE.TEAM_MEMBER,
+    role: overrides.role ?? ROLE.EMPLOYEE,
     isActive: overrides.isActive ?? true,
     hrId: overrides.hrId ?? null,
-    teamLeadId: overrides.teamLeadId ?? null,
   }) as unknown as Promise<UserDocument>;
 };
 

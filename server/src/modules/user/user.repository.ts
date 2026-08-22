@@ -7,18 +7,13 @@ import { UserModel, type UserAttrs, type UserDocument } from "./user.model.js";
 const PUBLIC_PROJECTION = "-password -tokenVersion";
 
 const RELATIONS = [
-  ["hrId", "name email role department designation"],
-  ["teamLeadId", "name email role department designation"],
+  ["hrId", "name email role department designation employeeId profileImage"],
   ["projectIds", "name code status"],
 ] as const;
 
 const withRelations = <T extends object>(query: T): T =>
   populateAll(query, RELATIONS);
 
-/**
- * All User persistence lives here. Services never touch UserModel directly,
- * which keeps query shape (projection, populate, lean) in one place.
- */
 export const userRepository = {
   model: UserModel,
 
@@ -44,11 +39,22 @@ export const userRepository = {
     return UserModel.findOne({ email }).exec();
   },
 
+  findByEmployeeId(employeeId: string): Promise<UserDocument | null> {
+    return UserModel.findOne({ employeeId }).exec();
+  },
+
   emailTakenByOther(
     email: string,
     excludeId: Types.ObjectId | string,
   ): Promise<boolean> {
     return UserModel.exists({ email, _id: { $ne: excludeId } }).then(Boolean);
+  },
+
+  employeeIdTakenByOther(
+    employeeId: string,
+    excludeId: Types.ObjectId | string,
+  ): Promise<boolean> {
+    return UserModel.exists({ employeeId, _id: { $ne: excludeId } }).then(Boolean);
   },
 
   findPublicById(id: Types.ObjectId | string) {
@@ -57,13 +63,15 @@ export const userRepository = {
       .exec();
   },
 
-  findMany(filter: Filter<UserAttrs>, pagination: ResolvedPagination) {
+  findMany(filter: Filter<UserAttrs>, pagination?: ResolvedPagination) {
     let query = withRelations(
       UserModel.find(filter).select(PUBLIC_PROJECTION),
     ).sort({ createdAt: -1 });
 
-    if (pagination.skip !== undefined) query = query.skip(pagination.skip);
-    if (pagination.limit !== undefined) query = query.limit(pagination.limit);
+    if (pagination) {
+      if (pagination.skip !== undefined) query = query.skip(pagination.skip);
+      if (pagination.limit !== undefined) query = query.limit(pagination.limit);
+    }
 
     return query.lean().exec();
   },
@@ -82,7 +90,6 @@ export const userRepository = {
   ): Promise<UserDocument | null> {
     return UserModel.findByIdAndUpdate(
       id,
-      // Deactivating must also kill live refresh tokens.
       isActive ? { isActive } : { isActive, $inc: { tokenVersion: 1 } },
       { new: true },
     )
@@ -118,13 +125,7 @@ export const userRepository = {
   },
 
   detachFromHierarchy(userId: Types.ObjectId | string) {
-    return Promise.all([
-      UserModel.updateMany({ hrId: userId }, { $set: { hrId: null } }).exec(),
-      UserModel.updateMany(
-        { teamLeadId: userId },
-        { $set: { teamLeadId: null } },
-      ).exec(),
-    ]);
+    return UserModel.updateMany({ hrId: userId }, { $set: { hrId: null } }).exec();
   },
 };
 

@@ -16,9 +16,9 @@ import {
   type TokenPair,
 } from "./token.service.js";
 
-/** The user payload shape the existing client already reads. */
 const toPublicUser = (user: UserDocument) => ({
   _id: user._id,
+  employeeId: user.employeeId,
   name: user.name,
   email: user.email,
   role: user.role,
@@ -27,8 +27,9 @@ const toPublicUser = (user: UserDocument) => ({
   phone: user.phone,
   projectIds: user.projectIds,
   hrId: user.hrId,
-  teamLeadId: user.teamLeadId,
   isActive: user.isActive,
+  joiningDate: user.joiningDate,
+  profileImage: user.profileImage,
   lastLogin: user.lastLogin,
 });
 
@@ -36,7 +37,6 @@ export const authService = {
   async login(input: LoginInput): Promise<TokenPair & { user: unknown }> {
     const user = await userRepository.findByEmailWithPassword(input.email);
 
-    // Same message for "no such user" and "wrong password" — no user enumeration.
     if (!user) {
       throw new UnauthorizedError(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
@@ -67,16 +67,20 @@ export const authService = {
       throw new ConflictError("An account with this email already exists.");
     }
 
-    // Public signup can never mint a privileged account.
+    const count = await userRepository.count({ role: ROLE.EMPLOYEE });
+    const employeeId = `EMP-${String(count + 101).padStart(3, "0")}`;
+
     const user = await userRepository.create({
+      employeeId,
       name: input.name,
       email: input.email,
       password: input.password,
-      role: ROLE.TEAM_MEMBER,
+      role: ROLE.EMPLOYEE,
       phone: input.phone,
       department: input.department,
       designation: input.designation,
       isActive: true,
+      joiningDate: new Date(),
     });
 
     return {
@@ -85,7 +89,6 @@ export const authService = {
     };
   },
 
-  /** Rotates the refresh token: the old one is dead once this returns. */
   async refresh(refreshToken: string): Promise<TokenPair & { user: unknown }> {
     const payload = verifyRefreshToken(refreshToken);
 
@@ -103,8 +106,6 @@ export const authService = {
       throw new UnauthorizedError("Refresh token has been revoked.");
     }
 
-    // Bumping the version invalidates the presented token along with any
-    // sibling copy an attacker may hold.
     user.tokenVersion += 1;
     await user.save();
 

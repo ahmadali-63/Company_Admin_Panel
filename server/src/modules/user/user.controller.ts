@@ -23,6 +23,7 @@ export const userController = {
       success: true,
       message: SUCCESS_MESSAGES.USER_CREATED,
       user,
+      data: user,
     });
   },
 
@@ -34,6 +35,7 @@ export const userController = {
       success: true,
       count: users.length,
       users,
+      data: users,
       pagination,
     });
   },
@@ -41,7 +43,7 @@ export const userController = {
   async getById(req: AuthedRequest<IdParam>, res: Response) {
     const user = await userService.getById(req.user, req.params.id);
 
-    res.status(200).json({ success: true, user });
+    res.status(200).json({ success: true, user, data: user });
   },
 
   async update(
@@ -54,6 +56,7 @@ export const userController = {
       success: true,
       message: SUCCESS_MESSAGES.USER_UPDATED,
       user,
+      data: user,
     });
   },
 
@@ -71,6 +74,7 @@ export const userController = {
       success: true,
       message: SUCCESS_MESSAGES.USER_STATUS_UPDATED,
       user,
+      data: user,
     });
   },
 

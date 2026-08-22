@@ -9,34 +9,39 @@ import {
 
 export const passwordSchema = z
   .string()
-  .min(8, "must be at least 8 characters")
+  .min(6, "must be at least 6 characters")
   .max(128);
 
 export const createUserSchema = z.object({
-  name: z.string().trim().min(1, "is required").max(100),
-  email: z.email().toLowerCase().trim(),
+  employeeId: z.string().trim().min(1, "Employee ID is required").max(30).optional(),
+  name: z.string().trim().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address").toLowerCase().trim(),
   password: passwordSchema,
   role: z.enum(ROLES),
   phone: z.string().trim().max(30).default(""),
   department: z.string().trim().max(100).default(""),
   designation: z.string().trim().max(100).default(""),
   hrId: objectIdSchema.nullish(),
-  teamLeadId: objectIdSchema.nullish(),
   projectIds: z.array(objectIdSchema).default([]),
+  joiningDate: z.coerce.date().optional(),
+  profileImage: z.string().default(""),
 });
 
 export const updateUserSchema = z
   .object({
+    employeeId: z.string().trim().max(30),
     name: z.string().trim().min(1).max(100),
-    email: z.email().toLowerCase().trim(),
+    email: z.string().email("Invalid email address").toLowerCase().trim(),
     password: passwordSchema,
     role: z.enum(ROLES),
     phone: z.string().trim().max(30),
     department: z.string().trim().max(100),
     designation: z.string().trim().max(100),
     hrId: objectIdSchema.nullable(),
-    teamLeadId: objectIdSchema.nullable(),
     projectIds: z.array(objectIdSchema),
+    joiningDate: z.coerce.date(),
+    profileImage: z.string(),
+    isActive: z.boolean(),
   })
   .partial();
 
@@ -47,6 +52,8 @@ export const updateUserStatusSchema = z.object({
 export const listUsersQuerySchema = paginationQuerySchema.extend({
   role: z.enum(ROLES).optional(),
   isActive: booleanQuerySchema.optional(),
+  department: z.string().trim().optional(),
+  hrId: objectIdSchema.optional(),
   search: z.string().trim().min(1).max(100).optional(),
 });
 

@@ -6,8 +6,10 @@ import { TaskModel, type TaskAttrs, type TaskDocument } from "./task.model.js";
 
 const RELATIONS = [
   ["projectId", "name code status"],
-  ["assignedTo", "name email role"],
-  ["createdBy", "name email role"],
+  ["assignedTo", "name email employeeId role department designation profileImage"],
+  ["assignedBy", "name email employeeId role"],
+  ["createdBy", "name email employeeId role"],
+  ["comments.author", "name email role profileImage"],
 ] as const;
 
 const withRelations = <T extends object>(query: T): T =>
@@ -28,11 +30,13 @@ export const taskRepository = {
     return withRelations(TaskModel.findById(id)).lean().exec();
   },
 
-  findMany(filter: Filter<TaskAttrs>, pagination: ResolvedPagination) {
-    let query = withRelations(TaskModel.find(filter)).sort({ createdAt: -1 });
+  findMany(filter: Filter<TaskAttrs>, pagination?: ResolvedPagination) {
+    let query = withRelations(TaskModel.find(filter)).sort({ deadline: 1, createdAt: -1 });
 
-    if (pagination.skip !== undefined) query = query.skip(pagination.skip);
-    if (pagination.limit !== undefined) query = query.limit(pagination.limit);
+    if (pagination) {
+      if (pagination.skip !== undefined) query = query.skip(pagination.skip);
+      if (pagination.limit !== undefined) query = query.limit(pagination.limit);
+    }
 
     return query.lean().exec();
   },

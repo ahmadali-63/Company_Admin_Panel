@@ -6,9 +6,11 @@ import type { IdParam } from "../../common/schemas/common.schema.js";
 import type { AuthedRequest } from "../../common/types/http.js";
 import { taskService } from "./task.service.js";
 import type {
+  AddTaskCommentInput,
   CreateTaskInput,
   ListTasksQuery,
   UpdateTaskInput,
+  UpdateTaskStatusInput,
 } from "./task.schema.js";
 
 export const taskController = {
@@ -22,6 +24,7 @@ export const taskController = {
       success: true,
       message: SUCCESS_MESSAGES.TASK_CREATED,
       task,
+      data: task,
     });
   },
 
@@ -33,6 +36,7 @@ export const taskController = {
       success: true,
       count: tasks.length,
       tasks,
+      data: tasks,
       pagination,
     });
   },
@@ -40,7 +44,7 @@ export const taskController = {
   async getById(req: AuthedRequest<IdParam>, res: Response) {
     const task = await taskService.getById(req.user, req.params.id);
 
-    res.status(200).json({ success: true, task });
+    res.status(200).json({ success: true, task, data: task });
   },
 
   async update(
@@ -53,11 +57,40 @@ export const taskController = {
       success: true,
       message: SUCCESS_MESSAGES.TASK_UPDATED,
       task,
+      data: task,
+    });
+  },
+
+  async updateStatus(
+    req: AuthedRequest<IdParam, unknown, UpdateTaskStatusInput>,
+    res: Response,
+  ) {
+    const task = await taskService.updateStatus(req.user, req.params.id, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "Task status updated successfully",
+      task,
+      data: task,
+    });
+  },
+
+  async addComment(
+    req: AuthedRequest<IdParam, unknown, AddTaskCommentInput>,
+    res: Response,
+  ) {
+    const task = await taskService.addComment(req.user, req.params.id, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "Comment added successfully",
+      task,
+      data: task,
     });
   },
 
   async remove(req: AuthedRequest<IdParam>, res: Response) {
-    await taskService.remove(req.params.id);
+    await taskService.remove(req.user, req.params.id);
 
     res.status(200).json({
       success: true,

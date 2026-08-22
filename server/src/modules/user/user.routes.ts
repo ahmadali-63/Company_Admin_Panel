@@ -27,14 +27,13 @@ router.post(
 
 router.get(
   "/",
-  authorize(ROLE.ADMIN, ROLE.HR, ROLE.TEAM_LEAD),
+  authorize(ROLE.ADMIN, ROLE.HR),
   validate({ query: listUsersQuerySchema }),
   asyncHandler(userController.list),
 );
 
 router.get(
   "/:id",
-  authorize(ROLE.ADMIN, ROLE.HR, ROLE.TEAM_LEAD),
   validate({ params: idParamSchema }),
   asyncHandler(userController.getById),
 );

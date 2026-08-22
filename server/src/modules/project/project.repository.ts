@@ -8,19 +8,17 @@ import {
   type ProjectDocument,
 } from "./project.model.js";
 
-const MEMBER_FIELDS = "name email role department designation";
+const MEMBER_FIELDS = "name email employeeId role department designation profileImage";
 
 const RELATIONS = [
-  ["createdBy", "name email role"],
+  ["createdBy", "name email employeeId role"],
   ["hrIds", MEMBER_FIELDS],
-  ["teamLeadIds", MEMBER_FIELDS],
+  ["employeeIds", MEMBER_FIELDS],
   ["memberIds", MEMBER_FIELDS],
 ] as const;
 
 const withRelations = <T extends object>(query: T): T =>
   populateAll(query, RELATIONS);
-
-export type ProjectRole = "hrIds" | "teamLeadIds" | "memberIds";
 
 export const projectRepository = {
   model: ProjectModel,
@@ -48,13 +46,15 @@ export const projectRepository = {
     return withRelations(ProjectModel.findById(id)).lean().exec();
   },
 
-  findMany(filter: Filter<ProjectAttrs>, pagination: ResolvedPagination) {
+  findMany(filter: Filter<ProjectAttrs>, pagination?: ResolvedPagination) {
     let query = withRelations(ProjectModel.find(filter)).sort({
       createdAt: -1,
     });
 
-    if (pagination.skip !== undefined) query = query.skip(pagination.skip);
-    if (pagination.limit !== undefined) query = query.limit(pagination.limit);
+    if (pagination) {
+      if (pagination.skip !== undefined) query = query.skip(pagination.skip);
+      if (pagination.limit !== undefined) query = query.limit(pagination.limit);
+    }
 
     return query.lean().exec();
   },
@@ -75,36 +75,13 @@ export const projectRepository = {
     return ProjectModel.findByIdAndDelete(id).exec();
   },
 
-  addAssignee(
-    projectId: Types.ObjectId | string,
-    field: ProjectRole,
-    userId: Types.ObjectId | string,
-  ) {
-    return ProjectModel.updateOne(
-      { _id: projectId },
-      { $addToSet: { [field]: userId } },
-    ).exec();
-  },
-
-  removeAssignee(
-    projectId: Types.ObjectId | string,
-    field: ProjectRole,
-    userId: Types.ObjectId | string,
-  ) {
-    return ProjectModel.updateOne(
-      { _id: projectId },
-      { $pull: { [field]: userId } },
-    ).exec();
-  },
-
-  /** Strip a user from every project they were assigned to. */
   detachUser(userId: Types.ObjectId | string) {
     return ProjectModel.updateMany(
       {
-        $or: [{ hrIds: userId }, { teamLeadIds: userId }, { memberIds: userId }],
+        $or: [{ hrIds: userId }, { employeeIds: userId }, { memberIds: userId }],
       },
       {
-        $pull: { hrIds: userId, teamLeadIds: userId, memberIds: userId },
+        $pull: { hrIds: userId, employeeIds: userId, memberIds: userId },
       },
     ).exec();
   },

@@ -24,8 +24,10 @@ import type {
 } from "./user.schema.js";
 
 /**
- * Row-level scope. Admin sees everything; HR sees itself plus its reports;
- * a team lead sees itself plus its members; a member sees only itself.
+ * Row-level scope.
+ * Admin: sees everything.
+ * HR: sees itself plus employees assigned to this HR.
+ * Employee: sees only itself.
  */
 export const buildUserScopeFilter = (
   actor: AuthenticatedUser,
@@ -35,100 +37,61 @@ export const buildUserScopeFilter = (
       return {};
     case ROLE.HR:
       return { $or: [{ _id: actor._id }, { hrId: actor._id }] };
-    case ROLE.TEAM_LEAD:
-      return { $or: [{ _id: actor._id }, { teamLeadId: actor._id }] };
     default:
       return { _id: actor._id };
   }
 };
 
-interface ResolvedHierarchy {
-  hrId: Types.ObjectId | null;
-  teamLeadId: Types.ObjectId | null;
-}
-
-/**
- * Enforces the org chart: team leads hang off an HR, members hang off a team
- * lead (and inherit that lead's HR). Admin and HR sit at the top with no parent.
- */
-const resolveHierarchy = async (
-  role: Role,
-  hrId: string | null | undefined,
-  teamLeadId: string | null | undefined,
-): Promise<ResolvedHierarchy> => {
-  if (role === ROLE.ADMIN || role === ROLE.HR) {
-    return { hrId: null, teamLeadId: null };
-  }
-
-  if (role === ROLE.TEAM_LEAD) {
-    if (!hrId) {
-      throw new BadRequestError("Team Lead must be assigned to a valid HR.");
-    }
-
-    const hrUser = await userRepository.findById(hrId);
-
-    if (!hrUser || hrUser.role !== ROLE.HR) {
-      throw new BadRequestError("Selected HR is invalid or not an HR role.");
-    }
-
-    return { hrId: hrUser._id, teamLeadId: null };
-  }
-
-  if (!teamLeadId) {
-    throw new BadRequestError(
-      "Team Member must be assigned to a valid Team Lead.",
-    );
-  }
-
-  const leadUser = await userRepository.findById(teamLeadId);
-
-  if (!leadUser || leadUser.role !== ROLE.TEAM_LEAD) {
-    throw new BadRequestError(
-      "Selected Team Lead is invalid or not a Team Lead role.",
-    );
-  }
-
-  if (!leadUser.hrId) {
-    throw new BadRequestError(
-      "The selected Team Lead is not assigned to an HR.",
-    );
-  }
-
-  if (hrId && !sameId(hrId, leadUser.hrId)) {
-    throw new BadRequestError(
-      "Team Member assigned to a Team Lead must belong to the same HR.",
-    );
-  }
-
-  return { hrId: leadUser.hrId, teamLeadId: leadUser._id };
+const generateEmployeeId = async (role: Role): Promise<string> => {
+  const prefix = role === ROLE.ADMIN ? "ADM" : role === ROLE.HR ? "HR" : "EMP";
+  const count = await userRepository.count({ role });
+  return `${prefix}-${String(count + 1).padStart(3, "0")}`;
 };
 
 export const userService = {
   async create(input: CreateUserInput) {
-    const existing = await userRepository.findByEmail(input.email);
+    if (input.role === ROLE.ADMIN) {
+      throw new ForbiddenError("Cannot create another Admin account. There is only one Admin.");
+    }
 
-    if (existing) {
+    const existingEmail = await userRepository.findByEmail(input.email);
+    if (existingEmail) {
       throw new ConflictError("A user with this email already exists.");
     }
 
-    const hierarchy = await resolveHierarchy(
-      input.role,
-      input.hrId,
-      input.teamLeadId,
-    );
+    let employeeId = input.employeeId?.trim();
+    if (!employeeId) {
+      employeeId = await generateEmployeeId(input.role);
+    } else {
+      const existingEmpId = await userRepository.findByEmployeeId(employeeId);
+      if (existingEmpId) {
+        throw new ConflictError("A user with this Employee ID already exists.");
+      }
+    }
+
+    let assignedHrId: Types.ObjectId | null = null;
+    if (input.role === ROLE.EMPLOYEE && input.hrId) {
+      const hrUser = await userRepository.findById(input.hrId);
+      if (!hrUser || hrUser.role !== ROLE.HR) {
+        throw new BadRequestError("Assigned HR is invalid or not an HR role.");
+      }
+      assignedHrId = hrUser._id;
+    }
 
     const user = await userRepository.create({
+      employeeId,
       name: input.name,
       email: input.email,
       password: input.password,
       role: input.role,
-      phone: input.phone,
-      department: input.department,
-      designation: input.designation,
-      hrId: hierarchy.hrId,
-      teamLeadId: hierarchy.teamLeadId,
-      projectIds: input.projectIds as unknown as Types.ObjectId[],
+      phone: input.phone || "",
+      department: input.department || "",
+      designation: input.designation || "",
+      hrId: assignedHrId,
+      projectIds: (input.projectIds as unknown as Types.ObjectId[]) || [],
       isActive: true,
+      joiningDate: input.joiningDate || new Date(),
+      profileImage: input.profileImage || "",
     });
 
     return userRepository.findPublicById(user._id);
@@ -140,14 +103,18 @@ export const userService = {
 
     if (query.role) filter.role = query.role;
     if (query.isActive !== undefined) filter.isActive = query.isActive;
+    if (query.department) filter.department = query.department;
+    if (query.hrId) filter.hrId = query.hrId as unknown as Types.ObjectId;
 
     if (query.search) {
       const search = [
         { name: { $regex: query.search, $options: "i" } },
         { email: { $regex: query.search, $options: "i" } },
+        { employeeId: { $regex: query.search, $options: "i" } },
+        { department: { $regex: query.search, $options: "i" } },
+        { designation: { $regex: query.search, $options: "i" } },
       ];
 
-      // `scope` may already own `$or`; combine with `$and` so neither is lost.
       if (filter.$or) {
         filter.$and = [{ $or: filter.$or }, { $or: search }];
         delete filter.$or;
@@ -180,7 +147,6 @@ export const userService = {
     return user;
   },
 
-  /** Ownership check: does `actor`'s scope contain the target user? */
   async canView(actor: AuthenticatedUser, targetId: string): Promise<boolean> {
     if (actor.role === ROLE.ADMIN) return true;
     if (sameId(actor._id, targetId)) return true;
@@ -201,6 +167,14 @@ export const userService = {
       throw new NotFoundError("User not found.");
     }
 
+    if (user.role === ROLE.ADMIN && input.role && input.role !== ROLE.ADMIN) {
+      throw new BadRequestError("Cannot change Admin role.");
+    }
+
+    if (input.role === ROLE.ADMIN && user.role !== ROLE.ADMIN) {
+      throw new ForbiddenError("Cannot promote user to Admin.");
+    }
+
     if (input.email && input.email !== user.email) {
       const taken = await userRepository.emailTakenByOther(input.email, id);
       if (taken) {
@@ -209,43 +183,45 @@ export const userService = {
       user.email = input.email;
     }
 
+    if (input.employeeId && input.employeeId !== user.employeeId) {
+      const takenEmpId = await userRepository.employeeIdTakenByOther(input.employeeId, id);
+      if (takenEmpId) {
+        throw new ConflictError("This Employee ID is already in use.");
+      }
+      user.employeeId = input.employeeId;
+    }
+
     if (input.name !== undefined) user.name = input.name;
     if (input.phone !== undefined) user.phone = input.phone;
     if (input.department !== undefined) user.department = input.department;
     if (input.designation !== undefined) user.designation = input.designation;
+    if (input.profileImage !== undefined) user.profileImage = input.profileImage;
+    if (input.joiningDate !== undefined) user.joiningDate = input.joiningDate;
 
-    const targetRole = input.role ?? user.role;
-
-    // Only re-derive the org chart when the caller actually touched it.
-    // Re-validating on every edit would reject an unrelated change (a phone
-    // number, say) for a pre-existing record whose parent links are empty.
-    const hierarchyTouched =
-      input.role !== undefined ||
-      input.hrId !== undefined ||
-      input.teamLeadId !== undefined;
-
-    if (hierarchyTouched) {
-      const hierarchy = await resolveHierarchy(
-        targetRole,
-        input.hrId !== undefined ? input.hrId : user.hrId?.toString(),
-        input.teamLeadId !== undefined
-          ? input.teamLeadId
-          : user.teamLeadId?.toString(),
-      );
-
-      user.hrId = hierarchy.hrId;
-      user.teamLeadId = hierarchy.teamLeadId;
+    if (input.hrId !== undefined) {
+      if (input.hrId === null) {
+        user.hrId = null;
+      } else {
+        const hrUser = await userRepository.findById(input.hrId);
+        if (!hrUser || hrUser.role !== ROLE.HR) {
+          throw new BadRequestError("Selected HR is invalid or not an HR.");
+        }
+        user.hrId = hrUser._id;
+      }
     }
 
-    user.role = targetRole;
+    if (input.role && input.role !== user.role && user.role !== ROLE.ADMIN) {
+      user.role = input.role;
+      if (user.role === ROLE.HR) {
+        user.hrId = null;
+      }
+    }
 
     if (input.projectIds !== undefined) {
       user.projectIds = input.projectIds as unknown as Types.ObjectId[];
     }
 
     if (input.password) {
-      // Plaintext in, hashed by the model's pre-save hook. Bump tokenVersion
-      // so any refresh token issued before the change stops working.
       user.password = input.password;
       user.tokenVersion += 1;
     }
@@ -256,35 +232,44 @@ export const userService = {
   },
 
   async setStatus(actor: AuthenticatedUser, id: string, isActive: boolean) {
+    const targetUser = await userRepository.findById(id);
+    if (!targetUser) {
+      throw new NotFoundError("User not found.");
+    }
+
+    if (targetUser.role === ROLE.ADMIN) {
+      throw new BadRequestError("Admin account cannot be deactivated.");
+    }
+
     if (sameId(actor._id, id) && !isActive) {
       throw new BadRequestError("You cannot deactivate your own account.");
     }
 
     const user = await userRepository.setActive(id, isActive);
-
-    if (!user) {
-      throw new NotFoundError("User not found.");
-    }
-
     return user;
   },
 
   async remove(actor: AuthenticatedUser, id: string): Promise<void> {
+    const targetUser = await userRepository.findById(id);
+    if (!targetUser) {
+      throw new NotFoundError("User not found.");
+    }
+
+    if (targetUser.role === ROLE.ADMIN) {
+      throw new BadRequestError("Admin account cannot be deleted.");
+    }
+
     if (sameId(actor._id, id)) {
       throw new BadRequestError("You cannot delete your own account.");
     }
 
     const user: UserDocument | null = await userRepository.deleteById(id);
 
-    if (!user) {
-      throw new NotFoundError("User not found.");
+    if (user) {
+      await Promise.all([
+        userRepository.detachFromHierarchy(user._id),
+        projectRepository.detachUser(user._id),
+      ]);
     }
-
-    // Leave no dangling references behind: clear the org-chart pointers and
-    // strip the user from every project assignment list.
-    await Promise.all([
-      userRepository.detachFromHierarchy(user._id),
-      projectRepository.detachUser(user._id),
-    ]);
   },
 };

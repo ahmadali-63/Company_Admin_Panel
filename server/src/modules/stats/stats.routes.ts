@@ -6,6 +6,9 @@ import { statsController } from "./stats.controller.js";
 
 const router = Router();
 
-router.get("/", authenticate, asyncHandler(statsController.dashboard));
+router.use(authenticate);
+
+router.get("/", asyncHandler(statsController.dashboard));
+router.get("/dashboard", asyncHandler(statsController.dashboard));
 
 export const statsRoutes = router;

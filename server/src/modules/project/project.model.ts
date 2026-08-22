@@ -14,8 +14,8 @@ export interface ProjectAttrs {
   endDate: Date | null;
   createdBy: Types.ObjectId;
   hrIds: Types.ObjectId[];
-  teamLeadIds: Types.ObjectId[];
-  memberIds: Types.ObjectId[];
+  employeeIds: Types.ObjectId[];
+  memberIds: Types.ObjectId[]; // alias for compatibility
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -41,7 +41,7 @@ const projectSchema = new Schema<ProjectAttrs, ProjectModelType>(
     endDate: { type: Date, default: null },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     hrIds: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    teamLeadIds: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    employeeIds: [{ type: Schema.Types.ObjectId, ref: "User" }],
     memberIds: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isActive: { type: Boolean, default: true },
   },
@@ -56,9 +56,18 @@ const projectSchema = new Schema<ProjectAttrs, ProjectModelType>(
   },
 );
 
+projectSchema.pre("save", function () {
+  if (this.employeeIds && (!this.memberIds || this.memberIds.length === 0)) {
+    this.memberIds = this.employeeIds;
+  }
+  if (this.memberIds && (!this.employeeIds || this.employeeIds.length === 0)) {
+    this.employeeIds = this.memberIds;
+  }
+});
+
 projectSchema.index({ status: 1 });
 projectSchema.index({ hrIds: 1 });
-projectSchema.index({ teamLeadIds: 1 });
+projectSchema.index({ employeeIds: 1 });
 projectSchema.index({ memberIds: 1 });
 projectSchema.index({ createdAt: -1 });
 

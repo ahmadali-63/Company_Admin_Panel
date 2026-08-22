@@ -1,244 +1,312 @@
-import type { PipelineStage, Types } from "mongoose";
+import type { Types } from "mongoose";
 
 import { ROLE } from "../../common/constants/roles.js";
 import type { AuthenticatedUser } from "../../common/types/auth.js";
 import type { Filter } from "../../common/types/db.js";
-import type { ProjectAttrs } from "../project/project.model.js";
-import { projectRepository } from "../project/project.repository.js";
-import { buildProjectScopeFilter } from "../project/project.service.js";
-import type { TaskAttrs } from "../task/task.model.js";
-import { taskRepository } from "../task/task.repository.js";
-import type { UserAttrs } from "../user/user.model.js";
-import { userRepository } from "../user/user.repository.js";
-import { buildUserScopeFilter } from "../user/user.service.js";
-
-interface Bucket {
-  _id: string | null;
-  count: number;
-}
-
-/** `$facet`: one round trip returns the total plus every per-value bucket. */
-const countByFieldPipeline = (
-  filter: Filter<unknown>,
-  field: string,
-): PipelineStage[] => [
-  { $match: filter },
-  {
-    $facet: {
-      total: [{ $count: "value" }],
-      buckets: [{ $group: { _id: `$${field}`, count: { $sum: 1 } } }],
-    },
-  },
-];
-
-interface FacetResult {
-  total: { value: number }[];
-  buckets: Bucket[];
-}
-
-const readFacet = (result: FacetResult[] | undefined) => {
-  const first = result?.[0];
-  const total = first?.total?.[0]?.value ?? 0;
-  const byKey = new Map<string, number>();
-
-  for (const bucket of first?.buckets ?? []) {
-    if (bucket._id !== null) byKey.set(String(bucket._id), bucket.count);
-  }
-
-  return {
-    total,
-    get: (key: string) => byKey.get(key) ?? 0,
-  };
-};
-
-interface ActivityItem {
-  id: string;
-  type: "user" | "project" | "task";
-  title: string;
-  description: string;
-  timestamp: Date;
-}
-
-interface Scopes {
-  userFilter: Filter<UserAttrs>;
-  projectFilter: Filter<ProjectAttrs>;
-  taskFilter: Filter<TaskAttrs>;
-}
-
-const buildScopes = async (actor: AuthenticatedUser): Promise<Scopes> => {
-  const userFilter = buildUserScopeFilter(actor);
-  const projectFilter = buildProjectScopeFilter(actor);
-
-  if (actor.role === ROLE.ADMIN) {
-    return { userFilter: {}, projectFilter: {}, taskFilter: {} };
-  }
-
-  if (actor.role === ROLE.TEAM_MEMBER) {
-    return { userFilter, projectFilter, taskFilter: { assignedTo: actor._id } };
-  }
-
-  const projectIds: Types.ObjectId[] =
-    await projectRepository.findIds(projectFilter);
-
-  const taskFilter: Filter<TaskAttrs> =
-    actor.role === ROLE.HR
-      ? { $or: [{ projectId: { $in: projectIds } }, { createdBy: actor._id }] }
-      : {
-          $or: [
-            { projectId: { $in: projectIds } },
-            { assignedTo: actor._id },
-            { createdBy: actor._id },
-          ],
-        };
-
-  return { userFilter, projectFilter, taskFilter };
-};
+import { AttendanceModel } from "../attendance/attendance.model.js";
+import { getTodayDateString } from "../attendance/attendance.service.js";
+import { LeaveModel } from "../leave/leave.model.js";
+import { ProjectModel, type ProjectAttrs } from "../project/project.model.js";
+import { TaskModel, type TaskAttrs } from "../task/task.model.js";
+import { UserModel, type UserAttrs } from "../user/user.model.js";
 
 export const statsService = {
   async dashboard(actor: AuthenticatedUser) {
-    const { userFilter, projectFilter, taskFilter } = await buildScopes(actor);
+    const today = getTodayDateString();
 
+    if (actor.role === ROLE.ADMIN) {
+      return this.adminDashboard(today);
+    } else if (actor.role === ROLE.HR) {
+      return this.hrDashboard(actor, today);
+    } else {
+      return this.employeeDashboard(actor, today);
+    }
+  },
+
+  async adminDashboard(today: string) {
     const [
-      userFacet,
-      projectFacet,
-      taskFacet,
+      totalUsers,
+      totalEmployees,
+      totalHRs,
+      departments,
+      todayAttendances,
+      activeLeaves,
+      pendingLeaves,
+      allTasks,
+      allProjects,
       recentUsers,
-      recentProjects,
-      recentTasks,
     ] = await Promise.all([
-      userRepository.model
-        .aggregate<FacetResult>(countByFieldPipeline(userFilter, "role"))
-        .exec(),
-      projectRepository.model
-        .aggregate<FacetResult>(countByFieldPipeline(projectFilter, "status"))
-        .exec(),
-      taskRepository.model
-        .aggregate<FacetResult>(countByFieldPipeline(taskFilter, "status"))
-        .exec(),
-      userRepository.model
-        .find(userFilter)
-        .select("name email role createdAt")
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .lean()
-        .exec(),
-      projectRepository.model
-        .find(projectFilter)
-        .select("name code status createdAt")
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .lean()
-        .exec(),
-      taskRepository.model
-        .find(taskFilter)
-        .select("title status priority createdAt completedAt")
-        .populate("assignedTo", "name")
-        .populate("projectId", "name")
-        .sort({ updatedAt: -1 })
-        .limit(5)
-        .lean()
-        .exec(),
+      UserModel.countDocuments({ isActive: true }),
+      UserModel.countDocuments({ role: ROLE.EMPLOYEE, isActive: true }),
+      UserModel.countDocuments({ role: ROLE.HR, isActive: true }),
+      UserModel.aggregate([
+        { $match: { isActive: true } },
+        { $group: { _id: "$department", count: { $sum: 1 } } },
+      ]),
+      AttendanceModel.find({ date: today }).populate("userId", "name email employeeId department designation role"),
+      LeaveModel.countDocuments({
+        status: "approved",
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+      }),
+      LeaveModel.countDocuments({ status: "pending" }),
+      TaskModel.find().populate("assignedTo", "name employeeId").populate("projectId", "name code").sort({ deadline: 1 }),
+      ProjectModel.find().populate("hrIds", "name").populate("employeeIds", "name"),
+      UserModel.find().select("name email employeeId role department createdAt").sort({ createdAt: -1 }).limit(5),
     ]);
 
-    const users = readFacet(userFacet);
-    const projects = readFacet(projectFacet);
-    const tasks = readFacet(taskFacet);
+    // Attendance stats
+    const presentToday = todayAttendances.filter((a) => a.status === "Present" || a.status === "Late" || a.status === "Half Day" || a.status === "Checked Out").length;
+    const currentlyInOffice = todayAttendances.filter((a) => a.checkIn && !a.checkOut).length;
+    const totalStaff = totalEmployees + totalHRs;
+    const absentToday = Math.max(0, totalStaff - presentToday - activeLeaves);
 
-    const totalHRs = users.get(ROLE.HR);
-    const totalTeamLeads = users.get(ROLE.TEAM_LEAD);
-    const totalTeamMembers = users.get(ROLE.TEAM_MEMBER);
-    const totalAdmins = users.get(ROLE.ADMIN);
+    // Task stats
+    const now = new Date();
+    let pendingTasks = 0;
+    let inProgressTasks = 0;
+    let completedTasks = 0;
+    let overdueTasks = 0;
 
-    const planningProjects = projects.get("planning");
-    const activeProjects = projects.get("active");
-    const onHoldProjects = projects.get("on_hold");
-    const completedProjects = projects.get("completed");
-    const cancelledProjects = projects.get("cancelled");
+    allTasks.forEach((t) => {
+      if (t.status === "completed") {
+        completedTasks++;
+      } else if (t.deadline && now > new Date(t.deadline)) {
+        overdueTasks++;
+      } else if (t.status === "in_progress") {
+        inProgressTasks++;
+      } else {
+        pendingTasks++;
+      }
+    });
 
-    const pendingTasks = tasks.get("pending");
-    const inProgressTasks = tasks.get("in_progress");
-    const completedTasks = tasks.get("completed");
-    const cancelledTasks = tasks.get("cancelled");
+    // Project stats
+    const activeProjects = allProjects.filter((p) => p.status === "active").length;
+    const planningProjects = allProjects.filter((p) => p.status === "planning").length;
+    const completedProjects = allProjects.filter((p) => p.status === "completed").length;
+    const onHoldProjects = allProjects.filter((p) => p.status === "on_hold").length;
 
-    const activities: ActivityItem[] = [];
+    // Upcoming deadlines (next 7 days, non-completed)
+    const upcomingDeadlines = allTasks
+      .filter((t) => t.status !== "completed" && t.deadline && new Date(t.deadline) >= now)
+      .slice(0, 5);
 
-    for (const user of recentUsers) {
-      activities.push({
-        id: `user-${String(user._id)}`,
-        type: "user",
-        title: "New Employee Joined",
-        description: `${user.name} (${user.role.replace("_", " ").toUpperCase()}) registered`,
-        timestamp: user.createdAt,
-      });
-    }
-
-    for (const project of recentProjects) {
-      activities.push({
-        id: `proj-${String(project._id)}`,
-        type: "project",
-        title: "Project Milestone",
-        description: `Project ${project.name} [${project.code}] is ${project.status.replace("_", " ")}`,
-        timestamp: project.createdAt,
-      });
-    }
-
-    for (const task of recentTasks) {
-      const assignee = task.assignedTo as unknown as { name?: string } | null;
-
-      activities.push({
-        id: `task-${String(task._id)}`,
-        type: "task",
-        title: task.status === "completed" ? "Task Completed" : "Task Updated",
-        description: `Task "${task.title}" for ${assignee?.name ?? "Member"} is ${task.status}`,
-        timestamp: task.completedAt ?? task.createdAt,
-      });
-    }
-
-    activities.sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-    );
+    const overdueList = allTasks
+      .filter((t) => t.status !== "completed" && t.deadline && now > new Date(t.deadline))
+      .slice(0, 5);
 
     return {
       stats: {
-        totalEmployees: users.total,
+        totalEmployees,
         totalHRs,
-        totalTeamLeads,
-        totalTeamMembers,
-        totalAdmins,
-        totalProjects: projects.total,
-        activeProjects,
-        completedProjects,
-        planningProjects,
-        onHoldProjects,
-        cancelledProjects,
-        totalTasks: tasks.total,
+        totalStaff,
+        presentToday,
+        absentToday,
+        currentlyInOffice,
+        onLeave: activeLeaves,
+        pendingLeaves,
+        totalTasks: allTasks.length,
         pendingTasks,
         inProgressTasks,
         completedTasks,
-        cancelledTasks,
+        overdueTasks,
+        totalProjects: allProjects.length,
+        activeProjects,
+        planningProjects,
+        completedProjects,
+        onHoldProjects,
       },
       charts: {
-        employeesByRole: [
-          { name: "HRs", value: totalHRs },
-          { name: "Team Leads", value: totalTeamLeads },
-          { name: "Team Members", value: totalTeamMembers },
-          { name: "Admins", value: totalAdmins },
+        attendanceBreakdown: [
+          { name: "Present", value: presentToday, color: "#10B981" },
+          { name: "Absent", value: absentToday, color: "#EF4444" },
+          { name: "On Leave", value: activeLeaves, color: "#F59E0B" },
         ],
-        projectsByStatus: [
+        departmentDistribution: departments
+          .filter((d) => d._id)
+          .map((d) => ({ name: d._id || "Other", count: d.count })),
+        taskStatusDistribution: [
+          { name: "Pending", value: pendingTasks },
+          { name: "In Progress", value: inProgressTasks },
+          { name: "Completed", value: completedTasks },
+          { name: "Overdue", value: overdueTasks },
+        ],
+        projectStatusDistribution: [
           { name: "Planning", value: planningProjects },
           { name: "Active", value: activeProjects },
           { name: "On Hold", value: onHoldProjects },
           { name: "Completed", value: completedProjects },
-          { name: "Cancelled", value: cancelledProjects },
+        ],
+      },
+      todayAttendance: todayAttendances.slice(0, 10),
+      upcomingDeadlines,
+      overdueTasks: overdueList,
+      recentUsers,
+    };
+  },
+
+  async hrDashboard(actor: AuthenticatedUser, today: string) {
+    const myEmployees = await UserModel.find({ hrId: actor._id, isActive: true }).select("_id name email employeeId department designation profileImage").lean();
+    const myEmployeeIds = myEmployees.map((e) => e._id);
+    const allTrackedIds = [...myEmployeeIds, actor._id];
+
+    const [
+      todayAttendances,
+      myActiveLeaves,
+      pendingLeaveRequests,
+      teamTasks,
+      myProjects,
+    ] = await Promise.all([
+      AttendanceModel.find({
+        date: today,
+        userId: { $in: allTrackedIds },
+      }).populate("userId", "name email employeeId department designation profileImage"),
+      LeaveModel.countDocuments({
+        userId: { $in: myEmployeeIds },
+        status: "approved",
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+      }),
+      LeaveModel.find({
+        userId: { $in: myEmployeeIds },
+        status: "pending",
+      }).populate("userId", "name email employeeId department designation"),
+      TaskModel.find({
+        $or: [
+          { assignedTo: { $in: allTrackedIds } },
+          { assignedBy: actor._id },
+        ],
+      }).populate("assignedTo", "name employeeId").populate("projectId", "name code").sort({ deadline: 1 }),
+      ProjectModel.find({ hrIds: actor._id }),
+    ]);
+
+    const presentToday = todayAttendances.filter((a) => a.status === "Present" || a.status === "Late" || a.status === "Half Day" || a.status === "Checked Out").length;
+    const absentToday = Math.max(0, myEmployees.length - presentToday - myActiveLeaves);
+
+    const now = new Date();
+    let pendingTasks = 0;
+    let inProgressTasks = 0;
+    let completedTasks = 0;
+    let overdueTasks = 0;
+
+    teamTasks.forEach((t) => {
+      if (t.status === "completed") {
+        completedTasks++;
+      } else if (t.deadline && now > new Date(t.deadline)) {
+        overdueTasks++;
+      } else if (t.status === "in_progress") {
+        inProgressTasks++;
+      } else {
+        pendingTasks++;
+      }
+    });
+
+    const upcomingDeadlines = teamTasks
+      .filter((t) => t.status !== "completed" && t.deadline && new Date(t.deadline) >= now)
+      .slice(0, 5);
+
+    const overdueList = teamTasks
+      .filter((t) => t.status !== "completed" && t.deadline && now > new Date(t.deadline))
+      .slice(0, 5);
+
+    return {
+      stats: {
+        myEmployeesCount: myEmployees.length,
+        presentToday,
+        absentToday,
+        onLeave: myActiveLeaves,
+        pendingLeaveRequests: pendingLeaveRequests.length,
+        totalTasks: teamTasks.length,
+        pendingTasks,
+        inProgressTasks,
+        completedTasks,
+        overdueTasks,
+        assignedProjectsCount: myProjects.length,
+      },
+      charts: {
+        attendanceBreakdown: [
+          { name: "Present", value: presentToday },
+          { name: "Absent", value: absentToday },
+          { name: "On Leave", value: myActiveLeaves },
         ],
         taskStatusDistribution: [
           { name: "Pending", value: pendingTasks },
           { name: "In Progress", value: inProgressTasks },
           { name: "Completed", value: completedTasks },
-          { name: "Cancelled", value: cancelledTasks },
+          { name: "Overdue", value: overdueTasks },
         ],
       },
-      recentActivity: activities.slice(0, 10),
+      todayAttendance: todayAttendances,
+      pendingLeaveRequests,
+      upcomingDeadlines,
+      overdueTasks: overdueList,
+      myEmployees: myEmployees.slice(0, 8),
+    };
+  },
+
+  async employeeDashboard(actor: AuthenticatedUser, today: string) {
+    const [todayAttendance, myTasks, myLeaves, myProjects] = await Promise.all([
+      AttendanceModel.findOne({ userId: actor._id, date: today }),
+      TaskModel.find({ assignedTo: actor._id }).populate("projectId", "name code").populate("assignedBy", "name email").sort({ deadline: 1 }),
+      LeaveModel.find({ userId: actor._id }).sort({ createdAt: -1 }).limit(5),
+      ProjectModel.find({
+        $or: [{ employeeIds: actor._id }, { memberIds: actor._id }],
+      }),
+    ]);
+
+    const now = new Date();
+    let pendingTasks = 0;
+    let inProgressTasks = 0;
+    let completedTasks = 0;
+    let overdueTasks = 0;
+
+    myTasks.forEach((t) => {
+      if (t.status === "completed") {
+        completedTasks++;
+      } else if (t.deadline && now > new Date(t.deadline)) {
+        overdueTasks++;
+      } else if (t.status === "in_progress") {
+        inProgressTasks++;
+      } else {
+        pendingTasks++;
+      }
+    });
+
+    const upcomingDeadlines = myTasks
+      .filter((t) => t.status !== "completed" && t.deadline && new Date(t.deadline) >= now)
+      .slice(0, 5);
+
+    const pendingLeaveCount = myLeaves.filter((l) => l.status === "pending").length;
+    const approvedLeaveCount = myLeaves.filter((l) => l.status === "approved").length;
+
+    return {
+      stats: {
+        totalTasks: myTasks.length,
+        pendingTasks,
+        inProgressTasks,
+        completedTasks,
+        overdueTasks,
+        assignedProjectsCount: myProjects.length,
+        pendingLeaves: pendingLeaveCount,
+        approvedLeaves: approvedLeaveCount,
+      },
+      todayAttendance: todayAttendance
+        ? {
+            hasCheckedIn: true,
+            hasCheckedOut: !!todayAttendance.checkOut,
+            checkInTime: todayAttendance.checkIn,
+            checkOutTime: todayAttendance.checkOut,
+            workingHours: todayAttendance.workingHours,
+            status: todayAttendance.status,
+          }
+        : {
+            hasCheckedIn: false,
+            hasCheckedOut: false,
+            status: "Not Checked In",
+          },
+      recentTasks: myTasks.slice(0, 6),
+      upcomingDeadlines,
+      recentLeaves: myLeaves,
     };
   },
 };
