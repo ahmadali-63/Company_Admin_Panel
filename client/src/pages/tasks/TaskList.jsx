@@ -185,7 +185,7 @@ const TaskList = () => {
     <div className="space-y-6 animate-in fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-white tracking-tight">Task Assignment Tracker</h1>
+          <h1 className="text-xl font-extrabold text-slate-100 tracking-tight">Task Assignment Tracker</h1>
           <p className="text-xs text-slate-400">Track task priorities, deliverables, and assignment statuses</p>
         </div>
         {canCreateTask && (

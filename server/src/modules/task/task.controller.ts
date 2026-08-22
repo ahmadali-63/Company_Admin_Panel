@@ -53,6 +53,7 @@ export const taskController = {
   ) {
     const task = await taskService.update(req.user, req.params.id, req.body);
 
+
     res.status(200).json({
       success: true,
       message: SUCCESS_MESSAGES.TASK_UPDATED,

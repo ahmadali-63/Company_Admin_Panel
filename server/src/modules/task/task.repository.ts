@@ -12,6 +12,7 @@ const RELATIONS = [
   ["comments.author", "name email role profileImage"],
 ] as const;
 
+
 const withRelations = <T extends object>(query: T): T =>
   populateAll(query, RELATIONS);
 

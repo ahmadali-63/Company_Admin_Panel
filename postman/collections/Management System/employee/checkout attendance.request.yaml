@@ -1,0 +1,18 @@
+$kind: http-request
+name: checkout attendance
+url: "{{BASE_URL}}attendance/check-out"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"ali@gmail.com,\",\r
+
+    \    \"password\": \"ali12345\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{EMPLOYEE_BEARER_TOKEN}}"
+order: 5000

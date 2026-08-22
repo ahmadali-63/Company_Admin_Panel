@@ -1,0 +1,22 @@
+$kind: http-request
+name: Get Today Attendence Status
+url: "{{BASE_URL}}attendance/today"
+method: GET
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"ali@gmail.com\",\r
+
+    \    \"password\": \"ali12345\"\r
+
+    }\r
+
+    \r
+
+    // {{BASE_URL}}attendance/today"
+auth:
+  type: bearer
+  credentials:
+    token: "{{EMPLOYEE_BEARER_TOKEN}}"
+order: 6000

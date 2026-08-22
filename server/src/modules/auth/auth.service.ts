@@ -42,7 +42,11 @@ export const authService = {
     }
 
     if (!user.isActive) {
-      throw new ForbiddenError(ERROR_MESSAGES.ACCOUNT_INACTIVE);
+      throw new ForbiddenError(
+        ERROR_MESSAGES.ACCOUNT_INACTIVE as ConstructorParameters<
+          typeof ForbiddenError
+        >[0],
+      );
     }
 
     const passwordMatches = await user.comparePassword(input.password);
@@ -99,7 +103,11 @@ export const authService = {
     }
 
     if (!user.isActive) {
-      throw new ForbiddenError(ERROR_MESSAGES.ACCOUNT_INACTIVE);
+      throw new ForbiddenError(
+        ERROR_MESSAGES.ACCOUNT_INACTIVE as ConstructorParameters<
+          typeof ForbiddenError
+        >[0],
+      );
     }
 
     if (tokenVersionOf(payload) !== user.tokenVersion) {

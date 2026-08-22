@@ -137,9 +137,14 @@ const UserList = () => {
       if (editingUser) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
+        if (payload.hrId === "") payload.hrId = null;
+        if (payload.teamLeadId === "") payload.teamLeadId = null;
         await API.put(`/users/${editingUser._id}`, payload);
       } else {
-        await API.post("/users", formData);
+        const payload = { ...formData };
+        if (payload.hrId === "") payload.hrId = null;
+        if (payload.teamLeadId === "") payload.teamLeadId = null;
+        await API.post("/users", payload);
       }
       setModalOpen(false);
       fetchUsers();
@@ -180,7 +185,7 @@ const UserList = () => {
       {/* Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-white tracking-tight">User Directory</h1>
+          <h1 className="text-xl font-extrabold text-slate-100 tracking-tight">User Directory</h1>
           <p className="text-xs text-slate-400">Manage all employee accounts, hierarchy, and permissions</p>
         </div>
         <button

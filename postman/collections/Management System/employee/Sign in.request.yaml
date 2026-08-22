@@ -1,0 +1,14 @@
+$kind: http-request
+name: Sign in
+url: "{{BASE_URL}}auth/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"employee2@gmail.com\",\r
+
+    \  \"password\": \"Admin@1234\"\r
+
+    }"
+order: 3000

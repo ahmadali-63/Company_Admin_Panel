@@ -15,8 +15,9 @@ import {
   Menu,
   X,
   ChevronDown,
-  Building2,
   Bell,
+  Clock,
+  FileText,
 } from "lucide-react";
 
 const DashboardLayout = () => {
@@ -75,6 +76,18 @@ const DashboardLayout = () => {
       roles: ["admin", "hr", "team_lead", "team_member"],
     },
     {
+      label: "Attendance",
+      path: "/attendance",
+      icon: Clock,
+      roles: ["admin", "hr", "team_lead", "team_member"],
+    },
+    {
+      label: "Leaves",
+      path: "/leaves",
+      icon: FileText,
+      roles: ["admin", "hr", "team_lead", "team_member"],
+    },
+    {
       label: "Settings",
       path: "/settings",
       icon: Settings,
@@ -92,14 +105,14 @@ const DashboardLayout = () => {
       <aside className="hidden lg:flex flex-col w-64 glass-panel border-r border-slate-800/80 sticky top-0 h-screen z-30">
         {/* Brand */}
         <div className="h-16 px-6 flex items-center gap-3 border-b border-slate-800/80">
-          <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">
-            <Building2 className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/30 flex items-center justify-center text-sm font-extrabold tracking-tight">
+            HI
           </div>
           <div>
-            <h1 className="font-extrabold text-base tracking-tight text-white leading-none">
-              Nexus<span className="text-indigo-400">Admin</span>
+            <h1 className="font-extrabold text-base tracking-tight text-blue-600 leading-none">
+              Nexus<span className="text-indigo-500">Admin</span>
             </h1>
-            <span className="text-[10px] font-semibold text-slate-400 tracking-wider uppercase">
+            <span className="text-[10px] font-semibold text-blue-400 tracking-wider uppercase">
               Company Portal
             </span>
           </div>
@@ -159,10 +172,10 @@ const DashboardLayout = () => {
       >
         <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-indigo-600 text-white">
-              <Building2 className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm font-extrabold tracking-tight">
+              HI
             </div>
-            <h1 className="font-extrabold text-base text-white">NexusAdmin</h1>
+            <h1 className="font-extrabold text-base text-blue-600">NexusAdmin</h1>
           </div>
           <button
             onClick={() => setMobileOpen(false)}

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
-  Building2,
   Lock,
   Mail,
   AlertCircle,
@@ -57,8 +56,8 @@ const Login = () => {
         <div className="md:col-span-5 p-8 md:p-10 bg-gradient-to-br from-indigo-900/40 via-slate-900 to-purple-900/40 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between">
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-600/30">
-                <Building2 className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/30 flex items-center justify-center text-base font-extrabold tracking-tight">
+                HI
               </div>
               <span className="font-extrabold text-lg tracking-tight text-white">
                 Nexus<span className="text-indigo-400">Admin</span>

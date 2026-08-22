@@ -1,5 +1,0 @@
-$kind: http-request
-name: Sign in
-url: GET http://localhost:5000/api/auth/login
-method: POST
-order: 419297899830480

@@ -42,7 +42,7 @@ export const authenticate = async (
     }
 
     if (user.isActive === false) {
-      throw new ForbiddenError("Your account is inactive.");
+      throw new ForbiddenError("You do not have permission to perform this action.");
     }
 
     req.user = user;

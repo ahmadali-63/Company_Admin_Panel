@@ -23,21 +23,6 @@ router.post(
 );
 
 router.post(
-  "/signup",
-  authRateLimiter,
-  validate({ body: signupSchema }),
-  asyncHandler(authController.signup),
-);
-
-// Kept as an alias: the existing client posts to /register.
-router.post(
-  "/register",
-  authRateLimiter,
-  validate({ body: signupSchema }),
-  asyncHandler(authController.signup),
-);
-
-router.post(
   "/refresh",
   authRateLimiter,
   validate({ body: refreshSchema }),

@@ -1,0 +1,12 @@
+$kind: http-request
+name: check my all attendance status
+url: "{{BASE_URL}}attendance/all"
+method: GET
+body:
+  type: json
+  content: ""
+auth:
+  type: bearer
+  credentials:
+    token: "{{EMPLOYEE_BEARER_TOKEN}}"
+order: 2884271330266183

@@ -148,7 +148,7 @@ const ProjectDetail = () => {
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-extrabold text-white">{project.name}</h1>
+              <h1 className="text-xl font-extrabold text-slate-100">{project.name}</h1>
               <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                 {project.code}
               </span>

@@ -38,7 +38,7 @@ const TeamLeadList = () => {
     <div className="space-y-6 animate-in fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-white tracking-tight">Team Leads</h1>
+          <h1 className="text-xl font-extrabold text-slate-100 tracking-tight">Team Leads</h1>
           <p className="text-xs text-slate-400">View and manage technical leads and supervisor assignments</p>
         </div>
       </div>

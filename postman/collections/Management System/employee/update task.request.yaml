@@ -1,0 +1,16 @@
+$kind: http-request
+name: update task
+url: "{{BASE_URL}}tasks/updateTask/6a7f6f06c11ea487149f8dea"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"title\": \"My first update task1\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{EMPLOYEE_BEARER_TOKEN}}"
+order: 4377538073209820

@@ -58,7 +58,7 @@ const UserDetail = () => {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-xl font-extrabold text-white">{userData.name}</h1>
+          <h1 className="text-xl font-extrabold text-slate-100">{userData.name}</h1>
           <p className="text-xs text-slate-400">Employee Details Profile</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ const UserDetail = () => {
               {userData.name?.[0]?.toUpperCase()}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">{userData.name}</h2>
+              <h2 className="text-lg font-bold text-slate-100">{userData.name}</h2>
               <div className="flex items-center gap-2 mt-1">
                 <RoleBadge role={userData.role} />
                 <StatusBadge status={userData.isActive ? "true" : "false"} />
