@@ -72,10 +72,12 @@ export class LeaveService {
     leave.status = status;
     leave.reviewedBy = reviewerId as Types.ObjectId;
     leave.reviewComment = reviewComment;
+    leave.reviewedAt = new Date();
 
     await leave.save();
     return leave;
   }
+
 }
 
 export const leaveService = new LeaveService();

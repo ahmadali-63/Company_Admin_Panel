@@ -4,6 +4,7 @@ import { ROLES } from "../../common/constants/roles.js";
 import {
   booleanQuerySchema,
   objectIdSchema,
+  optionalDate,
   paginationQuerySchema,
 } from "../../common/schemas/common.schema.js";
 
@@ -21,8 +22,10 @@ export const createUserSchema = z.object({
   department: z.string().trim().max(100).default(""),
   designation: z.string().trim().max(100).default(""),
   hrId: objectIdSchema.nullish(),
-  teamLeadId: objectIdSchema.nullish(),
   projectIds: z.array(objectIdSchema).default([]),
+  employeeId: z.string().trim().min(1, "is required").toUpperCase(),
+  joiningDate: optionalDate,
+  profileImage: z.string().trim().default(""),
 });
 
 export const updateUserSchema = z
@@ -35,8 +38,10 @@ export const updateUserSchema = z
     department: z.string().trim().max(100),
     designation: z.string().trim().max(100),
     hrId: objectIdSchema.nullable(),
-    teamLeadId: objectIdSchema.nullable(),
     projectIds: z.array(objectIdSchema),
+    employeeId: z.string().trim().min(1).toUpperCase(),
+    joiningDate: optionalDate,
+    profileImage: z.string().trim(),
   })
   .partial();
 

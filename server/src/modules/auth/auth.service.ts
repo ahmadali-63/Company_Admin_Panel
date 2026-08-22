@@ -27,7 +27,6 @@ const toPublicUser = (user: UserDocument) => ({
   phone: user.phone,
   projectIds: user.projectIds,
   hrId: user.hrId,
-  teamLeadId: user.teamLeadId,
   isActive: user.isActive,
   lastLogin: user.lastLogin,
 });

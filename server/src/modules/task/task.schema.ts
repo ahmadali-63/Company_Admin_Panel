@@ -10,7 +10,7 @@ import {
   paginationQuerySchema,
 } from "../../common/schemas/common.schema.js";
 
-export const  createTaskSchema = z.object({
+export const createTaskSchema = z.object({
   title: z.string().trim().min(1, "is required").max(200),
   description: z.string().trim().max(2000).default(""),
   projectId: objectIdSchema,
@@ -31,6 +31,10 @@ export const updateTaskSchema = z
   })
   .partial();
 
+export const addCommentSchema = z.object({
+  text: z.string().trim().min(1, "is required").max(1000),
+});
+
 export const listTasksQuerySchema = paginationQuerySchema.extend({
   projectId: objectIdSchema.optional(),
   assignedTo: objectIdSchema.optional(),
@@ -41,3 +45,4 @@ export const listTasksQuerySchema = paginationQuerySchema.extend({
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export type ListTasksQuery = z.infer<typeof listTasksQuerySchema>;
+export type AddCommentInput = z.infer<typeof addCommentSchema>;

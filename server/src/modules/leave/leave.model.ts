@@ -15,6 +15,7 @@ export interface LeaveAttrs {
   status: LeaveStatus;
   reviewedBy: Types.ObjectId | null;
   reviewComment: string;
+  reviewedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -61,6 +62,11 @@ const leaveSchema = new Schema<LeaveAttrs, LeaveModelType>(
     reviewComment: {
       type: String,
       default: "",
+      trim: true,
+    },
+    reviewedAt: {
+      type: Date,
+      default: null,
     },
   },
   {

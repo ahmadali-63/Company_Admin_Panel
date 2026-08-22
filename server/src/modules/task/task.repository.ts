@@ -10,6 +10,7 @@ const RELATIONS = [
   ["createdBy", "name email role"],
 ] as const;
 
+
 const withRelations = <T extends object>(query: T): T =>
   populateAll(query, RELATIONS);
 

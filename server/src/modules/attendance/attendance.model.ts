@@ -26,6 +26,10 @@ const attendanceSchema = new Schema<AttendanceAttrs, AttendanceModelType>(
       type: Date,
       default: null,
     },
+    workingHours: {
+      type: String,
+      default: null,
+    },
     status: {
       type: String,
       enum: ATTENDANCE_STATUSES,

@@ -1,4 +1,10 @@
-export const ROLES = ["admin", "hr", "team_lead", "team_member"] as const;
+export const ROLES = [
+  "admin",
+  "hr",
+  "team_lead",
+  "team_member",
+  "employee",
+] as const;
 
 export type Role = (typeof ROLES)[number];
 
@@ -7,6 +13,7 @@ export const ROLE = {
   HR: "hr",
   TEAM_LEAD: "team_lead",
   TEAM_MEMBER: "team_member",
+  EMPLOYEE: "employee",
 } as const satisfies Record<string, Role>;
 
 export const isRole = (value: unknown): value is Role =>

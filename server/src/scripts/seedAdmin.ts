@@ -29,9 +29,11 @@ const seedAdmin = async (): Promise<void> => {
     department: "Administration",
     designation: "System Admin",
     hrId: null,
-    teamLeadId: null,
     projectIds: [],
     isActive: true,
+    employeeId: "ADM001",
+    joiningDate: new Date(),
+    profileImage: "",
   });
 
   logger.info({ email }, "Admin created successfully");

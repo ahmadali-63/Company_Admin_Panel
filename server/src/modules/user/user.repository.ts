@@ -8,7 +8,6 @@ const PUBLIC_PROJECTION = "-password -tokenVersion";
 
 const RELATIONS = [
   ["hrId", "name email role department designation"],
-  ["teamLeadId", "name email role department designation"],
   ["projectIds", "name code status"],
 ] as const;
 
@@ -118,13 +117,7 @@ export const userRepository = {
   },
 
   detachFromHierarchy(userId: Types.ObjectId | string) {
-    return Promise.all([
-      UserModel.updateMany({ hrId: userId }, { $set: { hrId: null } }).exec(),
-      UserModel.updateMany(
-        { teamLeadId: userId },
-        { $set: { teamLeadId: null } },
-      ).exec(),
-    ]);
+    return UserModel.updateMany({ hrId: userId }, { $set: { hrId: null } }).exec();
   },
 };
 

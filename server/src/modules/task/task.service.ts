@@ -53,9 +53,7 @@ const buildTaskScopeFilter = async (
 
 export const taskService = {
   async create(actor: AuthenticatedUser, input: CreateTaskInput) {
-    console.log("🚀 ~ actor:", actor)
     const project = await projectRepository.findById(input.projectId);
-    console.log("🚀 ~ project:", project)
 
     if (!project) {
       throw new NotFoundError("Project not found.");
