@@ -37,13 +37,22 @@ export const buildUserScopeFilter = (
       return {};
     case ROLE.HR:
       return { $or: [{ _id: actor._id }, { hrId: actor._id }] };
+    case ROLE.TEAM_LEAD:
+      return { $or: [{ _id: actor._id }, { teamLeadId: actor._id }] };
     default:
       return { _id: actor._id };
   }
 };
 
 const generateEmployeeId = async (role: Role): Promise<string> => {
-  const prefix = role === ROLE.ADMIN ? "ADM" : role === ROLE.HR ? "HR" : "EMP";
+  const prefix =
+    role === ROLE.ADMIN
+      ? "ADM"
+      : role === ROLE.HR
+      ? "HR"
+      : role === ROLE.TEAM_LEAD
+      ? "TL"
+      : "EMP";
   const count = await userRepository.count({ role });
   return `${prefix}-${String(count + 1).padStart(3, "0")}`;
 };
@@ -70,12 +79,19 @@ export const userService = {
     }
 
     let assignedHrId: Types.ObjectId | null = null;
-    if (input.role === ROLE.EMPLOYEE && input.hrId) {
+    if (input.hrId) {
       const hrUser = await userRepository.findById(input.hrId);
-      if (!hrUser || hrUser.role !== ROLE.HR) {
-        throw new BadRequestError("Assigned HR is invalid or not an HR role.");
+      if (hrUser && (hrUser.role === ROLE.HR || hrUser.role === ROLE.ADMIN)) {
+        assignedHrId = hrUser._id;
       }
-      assignedHrId = hrUser._id;
+    }
+
+    let assignedTlId: Types.ObjectId | null = null;
+    if (input.teamLeadId) {
+      const tlUser = await userRepository.findById(input.teamLeadId);
+      if (tlUser && (tlUser.role === ROLE.TEAM_LEAD || tlUser.role === ROLE.HR || tlUser.role === ROLE.ADMIN)) {
+        assignedTlId = tlUser._id;
+      }
     }
 
     const user = await userRepository.create({
@@ -88,6 +104,7 @@ export const userService = {
       department: input.department || "",
       designation: input.designation || "",
       hrId: assignedHrId,
+      teamLeadId: assignedTlId,
       projectIds: (input.projectIds as unknown as Types.ObjectId[]) || [],
       isActive: true,
       joiningDate: input.joiningDate || new Date(),
@@ -203,10 +220,20 @@ export const userService = {
         user.hrId = null;
       } else {
         const hrUser = await userRepository.findById(input.hrId);
-        if (!hrUser || hrUser.role !== ROLE.HR) {
-          throw new BadRequestError("Selected HR is invalid or not an HR.");
+        if (hrUser) {
+          user.hrId = hrUser._id;
         }
-        user.hrId = hrUser._id;
+      }
+    }
+
+    if (input.teamLeadId !== undefined) {
+      if (input.teamLeadId === null) {
+        user.teamLeadId = null;
+      } else {
+        const tlUser = await userRepository.findById(input.teamLeadId);
+        if (tlUser) {
+          user.teamLeadId = tlUser._id;
+        }
       }
     }
 

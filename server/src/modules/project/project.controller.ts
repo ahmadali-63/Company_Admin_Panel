@@ -59,6 +59,64 @@ export const projectController = {
     });
   },
 
+  async assignMember(req: AuthedRequest<IdParam>, res: Response) {
+    const roleType = req.path.includes("/hr")
+      ? "hr"
+      : req.path.includes("/team-leads")
+      ? "team_lead"
+      : "member";
+    const body = (req.body || {}) as Record<string, unknown>;
+    const userId =
+      body.hrId ||
+      body.teamLeadId ||
+      body.memberId ||
+      body.employeeId ||
+      body.userId;
+
+    const project = await projectService.assignMember(
+      req.params.id,
+      String(userId),
+      roleType,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Member assigned successfully",
+      project,
+      data: project,
+    });
+  },
+
+  async removeMember(req: AuthedRequest<IdParam>, res: Response) {
+    const roleType = req.path.includes("/hr")
+      ? "hr"
+      : req.path.includes("/team-leads")
+      ? "team_lead"
+      : "member";
+    const body = (req.body || {}) as Record<string, unknown>;
+    const query = req.query as Record<string, unknown>;
+    const userId =
+      body.hrId ||
+      body.teamLeadId ||
+      body.memberId ||
+      body.employeeId ||
+      body.userId ||
+      query.userId;
+
+    const project = await projectService.removeMember(
+      req.params.id,
+      String(userId),
+      roleType,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Member removed successfully",
+      project,
+      data: project,
+    });
+  },
+
   async remove(req: AuthedRequest<IdParam>, res: Response) {
     await projectService.remove(req.params.id);
 

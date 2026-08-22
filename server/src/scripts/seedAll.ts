@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { connectDB, disconnectDB } from "../config/db.js";
 import { logger } from "../config/logger.js";
 import { ROLE } from "../common/constants/roles.js";
@@ -10,7 +11,9 @@ import { LeaveModel } from "../modules/leave/leave.model.js";
 import { NotificationModel } from "../modules/notification/notification.model.js";
 
 export const seedDatabase = async (): Promise<void> => {
-  await connectDB();
+  if (mongoose.connection.readyState === 0) {
+    await connectDB();
+  }
 
   logger.info("Checking database state...");
   const adminExists = await UserModel.findOne({ role: ROLE.ADMIN });

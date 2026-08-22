@@ -15,6 +15,7 @@ export interface UserAttrs {
   department: string;
   designation: string;
   hrId: Types.ObjectId | null;
+  teamLeadId: Types.ObjectId | null;
   projectIds: Types.ObjectId[];
   isActive: boolean;
   joiningDate: Date;
@@ -74,6 +75,7 @@ const userSchema = new Schema<UserAttrs, UserModelType, UserMethods>(
     department: { type: String, trim: true, default: "" },
     designation: { type: String, trim: true, default: "" },
     hrId: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    teamLeadId: { type: Schema.Types.ObjectId, ref: "User", default: null },
     projectIds: [{ type: Schema.Types.ObjectId, ref: "Project" }],
     isActive: { type: Boolean, default: true },
     joiningDate: { type: Date, default: Date.now },

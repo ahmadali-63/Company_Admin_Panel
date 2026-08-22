@@ -1,4 +1,10 @@
-export const ROLES = ["admin", "hr", "employee"] as const;
+export const ROLES = [
+  "admin",
+  "hr",
+  "employee",
+  "team_lead",
+  "team_member",
+] as const;
 
 export type Role = (typeof ROLES)[number];
 
@@ -6,6 +12,8 @@ export const ROLE = {
   ADMIN: "admin",
   HR: "hr",
   EMPLOYEE: "employee",
+  TEAM_LEAD: "team_lead",
+  TEAM_MEMBER: "team_member",
 } as const satisfies Record<string, Role>;
 
 export const isRole = (value: unknown): value is Role =>
@@ -40,6 +48,8 @@ export const LEAVE_TYPES = [
   "casual",
   "emergency",
   "unpaid",
+  "medical",
+  "urgent_work",
 ] as const;
 
 export type LeaveType = (typeof LEAVE_TYPES)[number];

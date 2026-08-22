@@ -178,6 +178,60 @@ export const projectService = {
     return projectRepository.findPopulatedById(project._id);
   },
 
+  async assignMember(
+    projectId: string,
+    userId: string,
+    roleType: "hr" | "team_lead" | "member" | "employee",
+  ) {
+    const project = await loadProject(projectId);
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundError("User not found.");
+    }
+
+    if (roleType === "hr") {
+      await projectRepository.model.updateOne(
+        { _id: project._id },
+        { $addToSet: { hrIds: user._id } },
+      );
+    } else {
+      await projectRepository.model.updateOne(
+        { _id: project._id },
+        { $addToSet: { employeeIds: user._id, memberIds: user._id } },
+      );
+    }
+
+    await userRepository.addProject(user._id, project._id);
+    return projectRepository.findPopulatedById(project._id);
+  },
+
+  async removeMember(
+    projectId: string,
+    userId: string,
+    roleType: "hr" | "team_lead" | "member" | "employee",
+  ) {
+    const project = await loadProject(projectId);
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundError("User not found.");
+    }
+
+    if (roleType === "hr") {
+      await projectRepository.model.updateOne(
+        { _id: project._id },
+        { $pull: { hrIds: user._id } },
+      );
+    } else {
+      await projectRepository.model.updateOne(
+        { _id: project._id },
+        { $pull: { employeeIds: user._id, memberIds: user._id } },
+      );
+    }
+
+    await userRepository.removeProject(user._id, project._id);
+    return projectRepository.findPopulatedById(project._id);
+  },
+
   async remove(id: string): Promise<void> {
     const project = await projectRepository.deleteById(id);
 

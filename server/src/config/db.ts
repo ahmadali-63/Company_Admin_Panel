@@ -12,6 +12,14 @@ if (!isProduction) {
 let mongodInstance: any = null;
 
 export const connectDB = async (uri: string = env.MONGODB_URI): Promise<void> => {
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+  if (mongoose.connection.readyState === 2) {
+    await mongoose.connection.asPromise();
+    return;
+  }
+
   try {
     const connection = await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 3_000,

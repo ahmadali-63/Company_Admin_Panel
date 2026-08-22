@@ -23,6 +23,20 @@ router.post(
 );
 
 router.post(
+  "/signup",
+  authRateLimiter,
+  validate({ body: signupSchema }),
+  asyncHandler(authController.signup),
+);
+
+router.post(
+  "/register",
+  authRateLimiter,
+  validate({ body: signupSchema }),
+  asyncHandler(authController.signup),
+);
+
+router.post(
   "/refresh",
   authRateLimiter,
   validate({ body: refreshSchema }),
