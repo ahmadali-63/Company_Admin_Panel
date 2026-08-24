@@ -1,6 +1,6 @@
 $kind: http-request
 name: signup
-url: "{{BASE_URL}}auth/signup"
+url: "{{b"
 method: POST
 body:
   type: json

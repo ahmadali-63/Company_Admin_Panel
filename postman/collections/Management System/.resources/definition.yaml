@@ -7,3 +7,15 @@ variables:
   - key: bearer_token_1c9o
     secret: true
     disabled: false
+auth:
+  - id: f0195286-6f63-4443-a835-707c94dcc7c3
+    type: jwt
+    name: JWT Bearer
+    credentials:
+      algorithm: HS256
+      isSecretBase64Encoded: false
+      payload: "{}"
+      addTokenTo: header
+      headerPrefix: Bearer
+      queryParamKey: token
+      header: "{}"

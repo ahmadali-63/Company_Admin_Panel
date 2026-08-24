@@ -8,5 +8,5 @@ body:
 auth:
   type: bearer
   credentials:
-    token: "{{EMPLOYEE_BEARER_TOKEN}}"
+    token: "{{vault:bearer_token_1c9o}}"
 order: 2000

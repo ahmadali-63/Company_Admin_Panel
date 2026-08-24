@@ -105,7 +105,9 @@ const resolveHierarchy = async (
 
 export const userService = {
   async create(input: CreateUserInput) {
+    console.log("🚀 ~ input: ", input)
     const existing = await userRepository.findByEmail(input.email);
+    console.log("🚀 ~ existing:", existing)
 
     if (existing) {
       throw new ConflictError("A user with this email already exists.");
@@ -116,6 +118,7 @@ export const userService = {
       input.hrId,
       input.teamLeadId,
     );
+    console.log("🚀 ~ hierarchy:", hierarchy)
 
     const user = await userRepository.create({
       name: input.name,
