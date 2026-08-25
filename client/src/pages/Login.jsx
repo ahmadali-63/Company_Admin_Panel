@@ -46,27 +46,27 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Dynamic background glow shapes */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none animate-pulse-glow"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#845EC2]/20 rounded-full blur-3xl pointer-events-none animate-pulse-glow"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#008F7A]/20 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="w-full max-w-4xl glass-panel bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12 relative z-10">
+      <div className="w-full max-w-4xl glass-panel bg-slate-950/85 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12 relative z-10 backdrop-blur-2xl">
         {/* Left Side Visual Hero Banner */}
-        <div className="md:col-span-5 p-8 md:p-10 bg-gradient-to-br from-indigo-900/40 via-slate-900 to-purple-900/40 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between">
+        <div className="md:col-span-5 p-8 md:p-10 bg-gradient-to-br from-[#845EC2]/20 via-slate-900 to-[#008F7A]/15 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between">
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/30 flex items-center justify-center text-base font-extrabold tracking-tight">
-                HI
+              <div className="w-12 h-12 rounded-2xl gradient-palette-bg text-white shadow-xl shadow-[#0081CF]/30 flex items-center justify-center text-base font-extrabold tracking-tight">
+                NA
               </div>
               <span className="font-extrabold text-lg tracking-tight text-white">
-                Nexus<span className="text-indigo-400">Admin</span>
+                Nexus<span className="text-gradient-accent">Admin</span>
               </span>
             </div>
 
             <div className="space-y-2">
               <h2 className="text-2xl font-extrabold text-white leading-tight">
-                Enterprise <span className="text-gradient">Admin Panel</span>
+                Enterprise <span className="text-gradient-palette">Admin Panel</span>
               </h2>
               <p className="text-xs text-slate-300 leading-relaxed">
                 Empowering teams with seamless role hierarchy, real-time analytics, and automated project workflows.
@@ -75,8 +75,8 @@ const Login = () => {
 
             {/* Micro Stats Preview */}
             <div className="space-y-3 pt-2">
-              <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+              <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/90 flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-[#008F7A]/20 text-[#008F7A]">
                   <TrendingUp className="w-4 h-4" />
                 </div>
                 <div>
@@ -84,8 +84,8 @@ const Login = () => {
                   <p className="text-xs font-bold text-slate-200">99.9% Operational</p>
                 </div>
               </div>
-              <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+              <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/90 flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-[#845EC2]/20 text-[#845EC2]">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
@@ -99,7 +99,7 @@ const Login = () => {
           <div className="pt-6 border-t border-slate-800/80">
             <p className="text-xs text-slate-400">
               Need an account?{" "}
-              <Link to="/register" className="text-indigo-400 font-bold hover:underline">
+              <Link to="/register" className="text-[#0081CF] font-bold hover:underline">
                 Create Account
               </Link>
             </p>
@@ -166,6 +166,27 @@ const Login = () => {
               )}
             </button>
           </form>
+
+          {/* Quick Demo Credentials Box */}
+          <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-wider">Default Admin Credentials</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("admin@example.com");
+                  setPassword("Admin@12345");
+                }}
+                className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+              >
+                Auto-fill
+              </button>
+            </div>
+            <div className="text-[11px] text-slate-400 space-y-0.5 font-mono">
+              <p>Email: <span className="text-slate-200">admin@example.com</span></p>
+              <p>Password: <span className="text-slate-200">Admin@12345</span></p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

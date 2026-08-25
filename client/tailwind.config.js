@@ -3,43 +3,73 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["'Plus Jakarta Sans'", "sans-serif"],
+      },
       colors: {
-        // User's Exact Custom Palette
-        black: { DEFAULT: '#000000', 100: '#000000', 200: '#000000', 300: '#000000', 400: '#000000', 500: '#000000', 600: '#333333', 700: '#666666', 800: '#999999', 900: '#cccccc' },
-        prussian_blue: { DEFAULT: '#14213d', 100: '#04070c', 200: '#080d19', 300: '#0c1425', 400: '#101b31', 500: '#14213d', 600: '#29447e', 700: '#3e67bf', 800: '#7e99d5', 900: '#beccea' },
-        orange: { DEFAULT: '#fca311', 100: '#362101', 200: '#6b4201', 300: '#a16402', 400: '#d68502', 500: '#fca311', 600: '#fdb541', 700: '#fec871', 800: '#fedaa0', 900: '#ffedd0' },
-        alabaster_grey: { DEFAULT: '#e5e5e5', 100: '#2e2e2e', 200: '#5c5c5c', 300: '#8a8a8a', 400: '#b8b8b8', 500: '#e5e5e5', 600: '#ebebeb', 700: '#f0f0f0', 800: '#f5f5f5', 900: '#fafafa' },
-        white: { DEFAULT: '#ffffff', 100: '#333333', 200: '#666666', 300: '#999999', 400: '#cccccc', 500: '#ffffff', 600: '#ffffff', 700: '#ffffff', 800: '#ffffff', 900: '#ffffff' },
-        
-        // Brand maps to Orange (inverted to match Tailwind's 50-light to 900-dark expected convention)
-        brand: {
-          50: '#ffedd0', // orange.900
-          100: '#fedaa0', // orange.800
-          200: '#fec871', // orange.700
-          300: '#fdb541', // orange.600
-          400: '#fca311', // orange.500
-          500: '#fca311', // DEFAULT
-          600: '#d68502', // orange.400
-          700: '#a16402', // orange.300
-          800: '#6b4201', // orange.200
-          900: '#362101', // orange.100
+        // Exact User 6-Color Palette
+        palette: {
+          purple: "#845EC2",
+          purpleLight: "#c084fc",
+          royal: "#2C73D2",
+          azure: "#0081CF",
+          ocean: "#0089BA",
+          teal: "#008E9B",
+          emerald: "#008F7A",
         },
-
-        // Slate was used for Dark Mode. We INVERT it here to map to our new Light Mode colors!
-        // So components using bg-slate-900 (dark) will magically become white/alabaster.
-        // And components using text-slate-100 (light text) will magically become prussian blue.
-        slate: {
-          50: '#000000', // black
-          100: '#14213d', // prussian_blue
-          200: '#29447e', // prussian_blue.600
-          300: '#3e67bf', // prussian_blue.700
-          400: '#7e99d5', // prussian_blue.800
-          500: '#b8b8b8', // alabaster_grey.400
-          600: '#e5e5e5', // alabaster_grey
-          700: '#f0f0f0', // alabaster_grey.700
-          800: '#f5f5f5', // alabaster_grey.800 (card bg)
-          900: '#fafafa', // alabaster_grey.900 (darker bg)
-          950: '#ffffff', // white (darkest bg -> now white base!)
+        dark: {
+          950: "#060913",
+          900: "#0a1020",
+          850: "#0f172e",
+          800: "#14203e",
+          750: "#1b2c52",
+          700: "#223867",
+        },
+        brand: {
+          50: "#faf5ff",
+          100: "#f3e8ff",
+          200: "#e9d5ff",
+          300: "#d8b4fe",
+          400: "#c084fc",
+          500: "#845EC2",
+          600: "#2C73D2",
+          700: "#0081CF",
+          800: "#0089BA",
+          900: "#008F7A",
+        },
+      },
+      backgroundImage: {
+        "matching-gradient":
+          "linear-gradient(135deg, #845EC2 0%, #2C73D2 20%, #0081CF 40%, #0089BA 60%, #008E9B 80%, #008F7A 100%)",
+        "matching-gradient-h":
+          "linear-gradient(90deg, #845EC2 0%, #2C73D2 20%, #0081CF 40%, #0089BA 60%, #008E9B 80%, #008F7A 100%)",
+        "purple-neon-gradient":
+          "linear-gradient(135deg, #845EC2 0%, #a855f7 50%, #2C73D2 100%)",
+        "cyan-neon-gradient":
+          "linear-gradient(135deg, #0081CF 0%, #0089BA 50%, #008F7A 100%)",
+      },
+      boxShadow: {
+        "glow-purple": "0 0 35px -5px rgba(132, 94, 194, 0.55)",
+        "glow-purple-lg": "0 0 45px 0px rgba(132, 94, 194, 0.70)",
+        "glow-royal": "0 0 35px -5px rgba(44, 115, 210, 0.55)",
+        "glow-azure": "0 0 35px -5px rgba(0, 129, 207, 0.55)",
+        "glow-emerald": "0 0 35px -5px rgba(0, 143, 122, 0.55)",
+        "card": "0 10px 30px -10px rgba(0, 0, 0, 0.5)",
+        "glass": "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+      },
+      animation: {
+        "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "float": "float 3s ease-in-out infinite",
+        "gradient-shift": "gradientShift 8s ease infinite alternate",
+      },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
+        gradientShift: {
+          "0%": { backgroundPosition: "0% 50%" },
+          "100%": { backgroundPosition: "100% 50%" },
         },
       },
     },

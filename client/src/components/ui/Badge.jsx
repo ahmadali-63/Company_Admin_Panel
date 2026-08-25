@@ -2,10 +2,10 @@ import React from "react";
 
 export const RoleBadge = ({ role }) => {
   const roleStyles = {
-    admin: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-    hr: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    team_lead: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    team_member: "bg-slate-500/10 text-slate-300 border-slate-500/20",
+    admin: "bg-[#845EC2]/20 text-[#d8b4fe] border-[#845EC2]/40 shadow-sm",
+    hr: "bg-[#2C73D2]/20 text-[#93c5fd] border-[#2C73D2]/40 shadow-sm",
+    team_lead: "bg-[#0081CF]/20 text-[#7dd3fc] border-[#0081CF]/40 shadow-sm",
+    team_member: "bg-[#008F7A]/20 text-[#6ee7b7] border-[#008F7A]/40 shadow-sm",
   };
 
   const roleNames = {
@@ -17,10 +17,21 @@ export const RoleBadge = ({ role }) => {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-        roleStyles[role] || "bg-slate-800 text-slate-300 border-slate-700"
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold border ${
+        roleStyles[role] || "bg-slate-800 text-slate-200 border-slate-700"
       }`}
     >
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${
+          role === "admin"
+            ? "bg-[#845EC2]"
+            : role === "hr"
+            ? "bg-[#2C73D2]"
+            : role === "team_lead"
+            ? "bg-[#0081CF]"
+            : "bg-[#008F7A]"
+        }`}
+      />
       {roleNames[role] || role}
     </span>
   );
@@ -28,17 +39,17 @@ export const RoleBadge = ({ role }) => {
 
 export const StatusBadge = ({ status }) => {
   const statusStyles = {
-    active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    planning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    on_hold: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-    completed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    cancelled: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    active: "bg-[#008F7A]/20 text-[#6ee7b7] border-[#008F7A]/40",
+    planning: "bg-[#845EC2]/20 text-[#d8b4fe] border-[#845EC2]/40",
+    on_hold: "bg-[#0089BA]/20 text-[#7dd3fc] border-[#0089BA]/40",
+    completed: "bg-[#2C73D2]/20 text-[#93c5fd] border-[#2C73D2]/40",
+    cancelled: "bg-rose-500/20 text-rose-300 border-rose-500/40",
 
-    pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    in_progress: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    pending: "bg-[#845EC2]/20 text-[#d8b4fe] border-[#845EC2]/40",
+    in_progress: "bg-[#0081CF]/20 text-[#7dd3fc] border-[#0081CF]/40",
 
-    true: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    false: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    true: "bg-[#008F7A]/20 text-[#6ee7b7] border-[#008F7A]/40",
+    false: "bg-rose-500/20 text-rose-300 border-rose-500/40",
   };
 
   const statusLabels = {
@@ -55,10 +66,23 @@ export const StatusBadge = ({ status }) => {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-        statusStyles[status] || "bg-slate-800 text-slate-300 border-slate-700"
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold border ${
+        statusStyles[status] || "bg-slate-800 text-slate-200 border-slate-700"
       }`}
     >
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${
+          status === "active" || status === true
+            ? "bg-[#008F7A] animate-pulse"
+            : status === "completed"
+            ? "bg-[#2C73D2]"
+            : status === "in_progress"
+            ? "bg-[#0081CF]"
+            : status === "pending" || status === "planning"
+            ? "bg-[#845EC2]"
+            : "bg-rose-400"
+        }`}
+      />
       {statusLabels[status] || status}
     </span>
   );
@@ -66,18 +90,29 @@ export const StatusBadge = ({ status }) => {
 
 export const PriorityBadge = ({ priority }) => {
   const styles = {
-    low: "bg-slate-500/10 text-slate-300 border-slate-500/20",
-    medium: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    high: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    urgent: "bg-rose-500/10 text-rose-400 border-rose-500/20 animate-pulse",
+    low: "bg-slate-800/80 text-slate-300 border-slate-700",
+    medium: "bg-[#2C73D2]/20 text-[#93c5fd] border-[#2C73D2]/40",
+    high: "bg-[#845EC2]/20 text-[#d8b4fe] border-[#845EC2]/40",
+    urgent: "bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-rose-500/20",
   };
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${
-        styles[priority] || "bg-slate-800 text-slate-300 border-slate-700"
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold border capitalize shadow-sm ${
+        styles[priority] || "bg-slate-800 text-slate-200 border-slate-700"
       }`}
     >
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${
+          priority === "urgent"
+            ? "bg-rose-400 animate-ping"
+            : priority === "high"
+            ? "bg-[#845EC2]"
+            : priority === "medium"
+            ? "bg-[#2C73D2]"
+            : "bg-slate-400"
+        }`}
+      />
       {priority}
     </span>
   );
