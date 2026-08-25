@@ -166,6 +166,27 @@ const Login = () => {
               )}
             </button>
           </form>
+
+          {/* Quick Demo Credentials Box */}
+          <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-wider">Default Admin Credentials</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("admin@example.com");
+                  setPassword("Admin@12345");
+                }}
+                className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+              >
+                Auto-fill
+              </button>
+            </div>
+            <div className="text-[11px] text-slate-400 space-y-0.5 font-mono">
+              <p>Email: <span className="text-slate-200">admin@example.com</span></p>
+              <p>Password: <span className="text-slate-200">Admin@12345</span></p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,17 @@
+{
+  "name": "company-admin-panel-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "seed": "npm --prefix server run seed:users",
+    "seed:users": "npm --prefix server run seed:users",
+    "seedUsers": "npm --prefix server run seed:users",
+    "seedusers": "npm --prefix server run seed:users",
+    "seed:admin": "npm --prefix server run seed:admin",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev"
+  },
+  "dependencies": {
+    "shadcn": "^4.19.0"
+  }
+}
