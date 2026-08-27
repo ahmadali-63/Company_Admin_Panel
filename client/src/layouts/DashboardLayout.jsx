@@ -36,6 +36,7 @@ const DashboardLayout = () => {
   const [notifDropdown, setNotifDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [sendModalOpen, setSendModalOpen] = useState(false);
+  const [replyData, setReplyData] = useState(null);
   const { socket } = useSocket();
 
   React.useEffect(() => {
@@ -352,9 +353,24 @@ const DashboardLayout = () => {
                               {!n.isRead && <span className="w-1.5 h-1.5 rounded-full bg-[#0081CF]" />}
                               {n.title}
                             </p>
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              {new Date(n.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                {new Date(n.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                              </span>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setReplyData({
+                                    receiverId: n.senderId?._id,
+                                    title: n.title.startsWith("Re:") ? n.title : `Re: ${n.title}`
+                                  });
+                                  setSendModalOpen(true);
+                                }}
+                                className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md transition-colors"
+                              >
+                                Reply
+                              </button>
+                            </div>
                           </div>
                           <p className="text-[11px] text-slate-300 pl-3 leading-snug">{n.message}</p>
                           <p className="text-[9px] text-slate-500 pl-3 italic">From: {n.senderId?.name}</p>
@@ -427,7 +443,14 @@ const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
-      <SendNotificationModal isOpen={sendModalOpen} onClose={() => setSendModalOpen(false)} />
+      <SendNotificationModal 
+        isOpen={sendModalOpen} 
+        onClose={() => {
+          setSendModalOpen(false);
+          setReplyData(null);
+        }} 
+        initialData={replyData}
+      />
     </div>
   );
 };

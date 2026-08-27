@@ -68,6 +68,10 @@ export const userRepository = {
     return query.lean().exec();
   },
 
+  findDirectory() {
+    return UserModel.find({ isActive: true }).select("name role _id").sort({ name: 1 }).lean().exec();
+  },
+
   count(filter: Filter<UserAttrs>): Promise<number> {
     return UserModel.countDocuments(filter).exec();
   },

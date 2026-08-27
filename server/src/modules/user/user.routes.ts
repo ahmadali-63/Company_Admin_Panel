@@ -26,6 +26,11 @@ router.post(
 );
 
 router.get(
+  "/directory",
+  asyncHandler(userController.directory),
+);
+
+router.get(
   "/",
   authorize(ROLE.ADMIN, ROLE.HR, ROLE.TEAM_LEAD),
   validate({ query: listUsersQuerySchema }),

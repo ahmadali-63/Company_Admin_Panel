@@ -38,6 +38,15 @@ export const userController = {
     });
   },
 
+  async directory(req: AuthedRequest, res: Response) {
+    const users = await userService.directory();
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  },
+
   async getById(req: AuthedRequest<IdParam>, res: Response) {
     const user = await userService.getById(req.user, req.params.id);
 

@@ -4,7 +4,7 @@ import { Send, AlertCircle } from "lucide-react";
 import { notificationService } from "../../services/notificationService";
 import API from "../../services/api";
 
-const SendNotificationModal = ({ isOpen, onClose }) => {
+const SendNotificationModal = ({ isOpen, onClose, initialData = null }) => {
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({ receiverId: "", title: "", message: "" });
   const [loading, setLoading] = useState(false);
@@ -12,11 +12,21 @@ const SendNotificationModal = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      API.get("/users").then((res) => {
-        setUsers(res.data.records || []);
+      if (initialData) {
+        setFormData({
+          receiverId: initialData.receiverId || "",
+          title: initialData.title || "",
+          message: ""
+        });
+      } else {
+        setFormData({ receiverId: "", title: "", message: "" });
+      }
+      
+      API.get("/users/directory").then((res) => {
+        setUsers(res.data.users || []);
       }).catch(console.error);
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

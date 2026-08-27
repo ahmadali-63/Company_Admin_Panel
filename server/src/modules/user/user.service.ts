@@ -169,6 +169,11 @@ export const userService = {
     return { users, pagination: buildPaginationMeta(total, pagination) };
   },
 
+  async directory() {
+    const users = await userRepository.findDirectory();
+    return users;
+  },
+
   async getById(actor: AuthenticatedUser, id: string) {
     const user = await userRepository.findPublicById(id);
 
