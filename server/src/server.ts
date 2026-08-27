@@ -4,6 +4,7 @@ import { createApp } from "./app.js";
 import { connectDB, disconnectDB } from "./config/db.js";
 import { env } from "./config/env.js";
 import { logger } from "./config/logger.js";
+import { initSocketIo } from "./common/utils/socket.js";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
@@ -17,6 +18,8 @@ const start = async (): Promise<void> => {
       "Server listening",
     );
   });
+
+  initSocketIo(server);
 
   let shuttingDown = false;
 

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
+import { notificationService } from "../services/notificationService";
+import SendNotificationModal from "../components/ui/SendNotificationModal";
 import { RoleBadge } from "../components/ui/Badge";
 import {
   LayoutDashboard,
@@ -31,6 +34,36 @@ const DashboardLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
   const [notifDropdown, setNotifDropdown] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [sendModalOpen, setSendModalOpen] = useState(false);
+  const { socket } = useSocket();
+
+  React.useEffect(() => {
+    notificationService.getMyNotifications().then(res => {
+      setNotifications(res.data);
+    }).catch(console.error);
+  }, []);
+
+  React.useEffect(() => {
+    if (!socket) return;
+    
+    socket.on("receive_notification", (newNotif) => {
+      setNotifications(prev => [newNotif, ...prev]);
+    });
+
+    return () => socket.off("receive_notification");
+  }, [socket]);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await notificationService.markAsRead(id);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -104,29 +137,7 @@ const DashboardLayout = () => {
     item.roles.includes(user?.role)
   );
 
-  const mockNotifications = [
-    {
-      id: 1,
-      title: "New Team Member assigned",
-      desc: "M Mahad joined the Skill development group",
-      time: "10m ago",
-      dot: "bg-indigo-400",
-    },
-    {
-      id: 2,
-      title: "Project Milestone reached",
-      desc: "Web Development QTP status updated to Active",
-      time: "1h ago",
-      dot: "bg-emerald-400",
-    },
-    {
-      id: 3,
-      title: "Task Assigned",
-      desc: "API authentication endpoints audit",
-      time: "3h ago",
-      dot: "bg-purple-400",
-    },
-  ];
+
 
   const userInitials = user?.name
     ? user.name
@@ -289,6 +300,12 @@ const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSendModalOpen(true)}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#0081CF]/20 text-[#0081CF] hover:bg-[#0081CF]/30 transition-colors border border-[#0081CF]/30"
+            >
+              Send Message
+            </button>
             {/* Notification Bell with Dropdown */}
             <div className="relative">
               <button
@@ -299,7 +316,9 @@ const DashboardLayout = () => {
                 className="p-2.5 rounded-2xl text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 transition-all relative"
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#0081CF] ring-2 ring-slate-950 animate-pulse"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#0081CF] ring-2 ring-slate-950 animate-pulse"></span>
+                )}
               </button>
 
               {notifDropdown && (
@@ -311,24 +330,37 @@ const DashboardLayout = () => {
                     <h4 className="text-xs font-extrabold uppercase tracking-wider text-white">
                       Notifications
                     </h4>
-                    <span className="text-[10px] font-bold text-[#0081CF] bg-[#0081CF]/15 px-2.5 py-0.5 rounded-full border border-[#0081CF]/30">
-                      3 New
-                    </span>
+                    {unreadCount > 0 && (
+                      <span className="text-[10px] font-bold text-[#0081CF] bg-[#0081CF]/15 px-2.5 py-0.5 rounded-full border border-[#0081CF]/30">
+                        {unreadCount} New
+                      </span>
+                    )}
                   </div>
 
-                  <div className="divide-y divide-slate-800/60 mt-1">
-                    {mockNotifications.map((n) => (
-                      <div key={n.id} className="py-2.5 first:pt-2 last:pb-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-                            <span className={`w-1.5 h-1.5 rounded-full ${n.dot}`} />
-                            {n.title}
-                          </p>
-                          <span className="text-[10px] text-slate-400 font-mono">{n.time}</span>
+                  <div className="divide-y divide-slate-800/60 mt-1 max-h-64 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="text-xs text-slate-400 p-4 text-center">No notifications yet</p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div 
+                          key={n._id} 
+                          className={`py-2.5 first:pt-2 last:pb-1 space-y-1 cursor-pointer hover:bg-white/5 px-2 rounded-lg transition-colors ${!n.isRead ? 'opacity-100' : 'opacity-60'}`}
+                          onClick={() => !n.isRead && handleMarkAsRead(n._id)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                              {!n.isRead && <span className="w-1.5 h-1.5 rounded-full bg-[#0081CF]" />}
+                              {n.title}
+                            </p>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {new Date(n.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-300 pl-3 leading-snug">{n.message}</p>
+                          <p className="text-[9px] text-slate-500 pl-3 italic">From: {n.senderId?.name}</p>
                         </div>
-                        <p className="text-[11px] text-slate-300 pl-3 leading-snug">{n.desc}</p>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -395,6 +427,7 @@ const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
+      <SendNotificationModal isOpen={sendModalOpen} onClose={() => setSendModalOpen(false)} />
     </div>
   );
 };

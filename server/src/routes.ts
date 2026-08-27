@@ -8,6 +8,7 @@ import { userRoutes } from "./modules/user/user.routes.js";
 
 import { attendanceRoutes } from "./modules/attendance/attendance.routes.js";
 import { leaveRoutes } from "./modules/leave/leave.routes.js";
+import { notificationRoutes } from "./modules/notification/notification.routes.js";
 
 /**
  * Single mount point for every feature module. Adding a feature means adding
@@ -22,4 +23,5 @@ apiRouter.use("/tasks", taskRoutes);
 apiRouter.use("/stats", statsRoutes);
 apiRouter.use("/attendance", attendanceRoutes);
 apiRouter.use("/leave", leaveRoutes);
+apiRouter.use("/notifications", notificationRoutes);
 

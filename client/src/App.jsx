@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleRoute from "./components/RoleRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -28,8 +29,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Public Authentication Routes */}
+        <SocketProvider>
+          <Routes>
+            {/* Public Authentication Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
@@ -72,6 +74,7 @@ function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
+        </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
   );
