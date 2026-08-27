@@ -14,12 +14,14 @@ router.use(authenticate);
 
 router.post(
   "/",
+  authorize(ROLE.HR, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
   validate({ body: applyLeaveSchema }),
   asyncHandler(leaveController.applyLeave),
 );
 
 router.get(
   "/my-leaves",
+  authorize(ROLE.HR, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
   asyncHandler(leaveController.getMyLeaves),
 );
 
@@ -32,7 +34,7 @@ router.get(
 
 router.put(
   "/:id/status",
-  authorize(ROLE.ADMIN, ROLE.HR, ROLE.TEAM_LEAD),
+  authorize(ROLE.ADMIN),
   validate({ params: idParamSchema, body: updateLeaveStatusSchema }),
   asyncHandler(leaveController.updateLeaveStatus),
 );

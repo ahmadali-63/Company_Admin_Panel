@@ -44,15 +44,19 @@ const Leaves = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
+  const isAdmin = user?.role === "admin";
   const isStaffManager = ["admin", "hr", "team_lead"].includes(user?.role);
-  const [activeTab, setActiveTab] = useState("my");
+  const [activeTab, setActiveTab] = useState(isAdmin ? "team" : "my");
 
   const fetchData = async () => {
     try {
       setLoading(true);
       setError("");
-      const myRes = await leaveService.getMyLeaves(1, 30);
-      setMyLeaves(myRes.data.records || []);
+      
+      if (!isAdmin) {
+        const myRes = await leaveService.getMyLeaves(1, 30);
+        setMyLeaves(myRes.data.records || []);
+      }
 
       if (isStaffManager) {
         const teamRes = await leaveService.getAllLeaves({ page: 1, limit: 50 });
@@ -137,13 +141,15 @@ const Leaves = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => setModalOpen(true)}
-          className="px-6 py-3.5 rounded-2xl btn-purple-glow text-xs font-extrabold flex items-center justify-center gap-2 active:scale-95 group shrink-0 z-10"
-        >
-          <Plus className="w-4 h-4 transition-transform group-hover:scale-110" />
-          Apply For Leave
-        </button>
+        {!isAdmin && (
+          <button
+            onClick={() => setModalOpen(true)}
+            className="px-6 py-3.5 rounded-2xl btn-purple-glow text-xs font-extrabold flex items-center justify-center gap-2 active:scale-95 group shrink-0 z-10"
+          >
+            <Plus className="w-4 h-4 transition-transform group-hover:scale-110" />
+            Apply For Leave
+          </button>
+        )}
       </div>
 
       {error && (
@@ -163,16 +169,18 @@ const Leaves = () => {
       {/* Tabs */}
       {isStaffManager && (
         <div className="flex items-center gap-2 p-1.5 bg-slate-950/80 rounded-2xl border border-slate-800/90 w-fit">
-          <button
-            onClick={() => setActiveTab("my")}
-            className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
-              activeTab === "my"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            My Leave Requests
-          </button>
+          {!isAdmin && (
+            <button
+              onClick={() => setActiveTab("my")}
+              className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+                activeTab === "my"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              My Leave Requests
+            </button>
+          )}
           <button
             onClick={() => setActiveTab("team")}
             className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all ${
@@ -195,12 +203,14 @@ const Leaves = () => {
           title="No Leave Requests"
           description="There are currently no leave records in this category."
           actionButton={
-            <button
-              onClick={() => setModalOpen(true)}
-              className="px-5 py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs shadow-lg shadow-indigo-600/30"
-            >
-              Apply For Leave
-            </button>
+            !isAdmin ? (
+              <button
+                onClick={() => setModalOpen(true)}
+                className="px-5 py-2.5 rounded-2xl bg-indigo-600 text-white font-bold text-xs shadow-lg shadow-indigo-600/30"
+              >
+                Apply For Leave
+              </button>
+            ) : null
           }
         />
       ) : (

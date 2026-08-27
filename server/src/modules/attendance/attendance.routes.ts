@@ -14,26 +14,31 @@ router.use(authenticate);
 
 router.post(
   "/check-in",
+  authorize(ROLE.HR, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
   validate({ body: createAttendanceSchema }),
   asyncHandler(attendanceController.checkIn),
 );
 
 router.post(
   ROUTES.ATTENDANCE.CHECK_OUT,
+  authorize(ROLE.HR, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
   asyncHandler(attendanceController.checkOut),
 );
 
 router.get(
   ROUTES.ATTENDANCE.TODAY_STATUS,
+  authorize(ROLE.HR, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
   asyncHandler(attendanceController.getTodayStatus),
 );
 router.get(
   "/today",
+  authorize(ROLE.HR, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
   asyncHandler(attendanceController.getTodayStatus),
 );
 
 router.get(
   ROUTES.ATTENDANCE.MY_ATTENDANCE,
+  authorize(ROLE.HR, ROLE.TEAM_LEAD, ROLE.TEAM_MEMBER),
   asyncHandler(attendanceController.getMyAttendance),
 );
 

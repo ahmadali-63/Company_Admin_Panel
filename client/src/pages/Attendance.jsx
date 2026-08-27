@@ -15,8 +15,9 @@ const Attendance = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
 
+  const isAdmin = user?.role === "admin";
   const isStaffManager = ["admin", "hr", "team_lead"].includes(user?.role);
-  const [tab, setTab] = useState("my"); // "my" or "team"
+  const [tab, setTab] = useState(isAdmin ? "team" : "my");
 
   // Live digital clock
   useEffect(() => {
@@ -30,11 +31,14 @@ const Attendance = () => {
     try {
       setLoading(true);
       setError("");
-      const todayRes = await attendanceService.getTodayStatus();
-      setTodayRecord(todayRes.data);
+      
+      if (!isAdmin) {
+        const todayRes = await attendanceService.getTodayStatus();
+        setTodayRecord(todayRes.data);
 
-      const myRes = await attendanceService.getMyAttendance(1, 20);
-      setRecords(myRes.data.records || []);
+        const myRes = await attendanceService.getMyAttendance(1, 20);
+        setRecords(myRes.data.records || []);
+      }
 
       if (isStaffManager) {
         const teamRes = await attendanceService.getAllAttendance({ page: 1, limit: 30 });
@@ -120,7 +124,8 @@ const Attendance = () => {
 
       {/* Clock In / Out Action Widget */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 glass-card p-6 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+        {!isAdmin && (
+          <div className="md:col-span-1 glass-card p-6 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
           <div>
             <h2 className="text-lg font-bold text-slate-100 mb-1">Today's Office Status</h2>
             <p className="text-xs text-slate-400 mb-4">
@@ -188,9 +193,10 @@ const Attendance = () => {
             )}
           </div>
         </div>
+        )}
 
         {/* History / Logs Table */}
-        <div className="md:col-span-2 glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div className={`${isAdmin ? 'md:col-span-3' : 'md:col-span-2'} glass-card p-6 rounded-2xl border border-slate-800 space-y-4`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
               <Calendar className="w-5 h-5 text-indigo-400" />
@@ -198,14 +204,16 @@ const Attendance = () => {
             </h2>
             {isStaffManager && (
               <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
-                <button
-                  onClick={() => setTab("my")}
-                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
-                    tab === "my" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  My Logs
-                </button>
+                {!isAdmin && (
+                  <button
+                    onClick={() => setTab("my")}
+                    className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                      tab === "my" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    My Logs
+                  </button>
+                )}
                 <button
                   onClick={() => setTab("team")}
                   className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
