@@ -1,6 +1,9 @@
 import { AttendanceModel } from "./attendance.model.js";
 import { BadRequestError, NotFoundError } from "../../common/errors/AppError.js";
 import type { Types } from "mongoose";
+import type { AuthenticatedUser } from "../../common/types/auth.js";
+import { buildUserScopeFilter } from "../user/user.service.js";
+import { UserModel } from "../user/user.model.js";
 
 const getTodayString = (): string => {
   const today = new Date();
@@ -70,9 +73,24 @@ export class AttendanceService {
     return { records, total, page, limit, pages: Math.ceil(total / limit) };
   }
 
-  async getAllAttendance(query: { userId?: string; startDate?: string; endDate?: string; page?: number; limit?: number }) {
+  async getAllAttendance(
+    actor: AuthenticatedUser,
+    query: { userId?: string; startDate?: string; endDate?: string; page?: number; limit?: number }
+  ) {
+    const scopeFilter = buildUserScopeFilter(actor);
+    const allowedUsers = await UserModel.find(scopeFilter).select("_id").lean();
+    const allowedUserIds = allowedUsers.map(u => u._id);
+
     const filter: Record<string, unknown> = {};
-    if (query.userId) filter.userId = query.userId;
+    if (query.userId) {
+      if (!allowedUserIds.some(id => id.toString() === query.userId)) {
+        return { records: [], total: 0, page: query.page || 1, limit: query.limit || 20, pages: 0 };
+      }
+      filter.userId = query.userId;
+    } else {
+      filter.userId = { $in: allowedUserIds };
+    }
+
     if (query.startDate || query.endDate) {
       filter.date = {};
       if (query.startDate) (filter.date as Record<string, string>).$gte = query.startDate;

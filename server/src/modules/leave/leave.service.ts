@@ -1,6 +1,9 @@
 import { LeaveModel, type LeaveType, type LeaveStatus } from "./leave.model.js";
 import { NotFoundError } from "../../common/errors/AppError.js";
 import type { Types } from "mongoose";
+import type { AuthenticatedUser } from "../../common/types/auth.js";
+import { buildUserScopeFilter } from "../user/user.service.js";
+import { UserModel } from "../user/user.model.js";
 
 export class LeaveService {
   async applyLeave(
@@ -29,15 +32,28 @@ export class LeaveService {
     return { records, total, page, limit, pages: Math.ceil(total / limit) };
   }
 
-  async getAllLeaves(query: {
+  async getAllLeaves(
+    actor: AuthenticatedUser,
+    query: {
     userId?: string;
     status?: LeaveStatus;
     leaveType?: LeaveType;
     page?: number;
     limit?: number;
   }) {
+    const scopeFilter = buildUserScopeFilter(actor);
+    const allowedUsers = await UserModel.find(scopeFilter).select("_id").lean();
+    const allowedUserIds = allowedUsers.map(u => u._id);
+
     const filter: Record<string, unknown> = {};
-    if (query.userId) filter.userId = query.userId;
+    if (query.userId) {
+      if (!allowedUserIds.some(id => id.toString() === query.userId)) {
+        return { records: [], total: 0, page: query.page || 1, limit: query.limit || 20, pages: 0 };
+      }
+      filter.userId = query.userId;
+    } else {
+      filter.userId = { $in: allowedUserIds };
+    }
     if (query.status) filter.status = query.status;
     if (query.leaveType) filter.leaveType = query.leaveType;
 

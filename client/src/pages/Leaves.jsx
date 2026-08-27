@@ -281,6 +281,12 @@ const Leaves = () => {
                         )}
                         {leave.status}
                       </span>
+                      {leave.reviewComment && (
+                        <div className="mt-2 text-[10px] text-slate-400 max-w-xs italic border-l-2 border-slate-700 pl-2">
+                          <span className="font-bold text-slate-300">Note: </span>
+                          {leave.reviewComment}
+                        </div>
+                      )}
                     </td>
                     {activeTab === "team" && (
                       <td className="px-6 py-4 text-right">

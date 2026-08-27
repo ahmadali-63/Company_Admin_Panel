@@ -24,7 +24,7 @@ export class LeaveController {
   }
 
   async getAllLeaves(req: Request, res: Response) {
-    const result = await leaveService.getAllLeaves(req.query);
+    const result = await leaveService.getAllLeaves(req.user!, req.query);
     res.status(200).json({
       success: true,
       data: result,

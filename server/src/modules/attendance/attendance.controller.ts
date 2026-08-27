@@ -44,7 +44,7 @@ export class AttendanceController {
   }
 
   async getAllAttendance(req: Request, res: Response) {
-    const result = await attendanceService.getAllAttendance(req.query);
+    const result = await attendanceService.getAllAttendance(req.user!, req.query);
     res.status(200).json({
       success: true,
       data: result,
