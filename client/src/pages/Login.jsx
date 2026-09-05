@@ -9,11 +9,14 @@ import {
   ShieldCheck,
   TrendingUp,
   Users,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -129,7 +132,6 @@ const Login = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@example.com"
                   className="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
                   required
                 />
@@ -141,13 +143,19 @@ const Login = () => {
               <div className="relative">
                 <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+                  className="w-full pl-10 pr-10 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
@@ -167,26 +175,7 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Quick Demo Credentials Box */}
-          <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-wider">Default Admin Credentials</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail("admin@example.com");
-                  setPassword("Admin@12345");
-                }}
-                className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
-              >
-                Auto-fill
-              </button>
-            </div>
-            <div className="text-[11px] text-slate-400 space-y-0.5 font-mono">
-              <p>Email: <span className="text-slate-200">admin@example.com</span></p>
-              <p>Password: <span className="text-slate-200">Admin@12345</span></p>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
