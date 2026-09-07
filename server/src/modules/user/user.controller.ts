@@ -15,7 +15,7 @@ import type {
 export const userController = {
   async create(
     req: AuthedRequest<Record<string, string>, unknown, CreateUserInput>,
-    res: Response,
+    res: Response, 
   ) {
     const user = await userService.create(req.body);
 
