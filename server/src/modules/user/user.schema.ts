@@ -48,6 +48,7 @@ export const listUsersQuerySchema = paginationQuerySchema.extend({
   role: z.enum(ROLES).optional(),
   isActive: booleanQuerySchema.optional(),
   search: z.string().trim().min(1).max(100).optional(),
+  searchId: objectIdSchema.optional(),
 });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;

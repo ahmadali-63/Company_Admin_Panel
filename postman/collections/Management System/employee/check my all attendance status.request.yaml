@@ -1,6 +1,6 @@
 $kind: http-request
 name: check my all attendance status
-url: "{{BASE_URL}}attendance/all"
+url: '{{BASE_URL}}attendance/my-attendance'
 method: GET
 body:
   type: json

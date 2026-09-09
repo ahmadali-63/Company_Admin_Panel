@@ -1,7 +1,7 @@
 name: Development
 values:
   - key: BASE_URL
-    value: ''
+    value: 'http://localhost:5000/api/'
   - key: HR_BEARER_TOKEN
     secret: true
   - key: EMPLOYEE_BEARER_TOKEN

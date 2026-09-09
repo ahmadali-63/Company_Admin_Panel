@@ -143,6 +143,7 @@ export const userService = {
 
     if (query.role) filter.role = query.role;
     if (query.isActive !== undefined) filter.isActive = query.isActive;
+    if (query.searchId) filter._id = query.searchId;
 
     if (query.search) {
       const search = [

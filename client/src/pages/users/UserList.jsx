@@ -32,6 +32,7 @@ const UserList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [searchId, setSearchId] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [viewMode, setViewMode] = useState("grid"); // "grid" or "table"
@@ -70,6 +71,7 @@ const UserList = () => {
       setLoading(true);
       const params = {};
       if (search) params.search = search;
+      if (searchId) params.searchId = searchId;
       if (roleFilter) params.role = roleFilter;
       if (statusFilter) params.isActive = statusFilter;
 
@@ -98,7 +100,7 @@ const UserList = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [search, roleFilter, statusFilter]);
+  }, [search, searchId, roleFilter, statusFilter]);
 
   useEffect(() => {
     fetchDropdownUsers();
@@ -237,7 +239,26 @@ const UserList = () => {
               onClick={() => setSearch("")}
               className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-0.5 rounded-lg transition-colors"
             >
-              <X className="w-3.5 h-3.5" />
+              <XCircle className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="relative flex-1 w-full group max-w-[220px]">
+          <Search className="w-4 h-4 absolute left-4 top-3.5 text-[#c084fc] group-focus-within:text-[#7dd3fc] transition-colors" />
+          <input
+            type="text"
+            placeholder="Search by User ID..."
+            value={searchId}
+            onChange={(e) => setSearchId(e.target.value)}
+            className="w-full pl-11 pr-10 py-3 bg-[#060918]/90 border border-white/10 rounded-2xl text-xs text-white placeholder-slate-400 font-medium focus:outline-none focus:border-[#845EC2] focus:ring-4 focus:ring-[#845EC2]/20 transition-all shadow-inner"
+          />
+          {searchId && (
+            <button
+              onClick={() => setSearchId("")}
+              className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white p-0.5 rounded-lg transition-colors"
+            >
+              <XCircle className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

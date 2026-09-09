@@ -17,6 +17,8 @@
     "seed:users": "tsx src/scripts/seedUsers.ts",
     "seedUsers": "tsx src/scripts/seedUsers.ts",
     "seedusers": "tsx src/scripts/seedUsers.ts",
+    "seed:custom": "tsx src/scripts/seedCustomUser.ts",
+    "seed:admin-custom": "tsx src/scripts/seedCustomAdmin.ts",
     "seed:prod": "node dist/scripts/seedAdmin.js",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -1,2 +1,5 @@
 name: Globals
-values: []
+values:
+  - key: 'http://localhost:5000/api/'
+    enabled: true
+    secret: true
